@@ -1,0 +1,10 @@
+services:
+  frontend:
+    build:
+      context: ./veterinaria-san-marcos-Front
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./veterinaria-san-marcos-Front:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0
