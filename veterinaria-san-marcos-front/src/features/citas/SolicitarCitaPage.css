@@ -1,0 +1,592 @@
+﻿
+.citas-page {
+  width: 100%;
+  min-height: calc(100vh - 112px);
+  box-sizing: border-box;
+  padding: 34px clamp(18px, 4vw, 64px) 48px;
+  background:
+    radial-gradient(ellipse at 8% 0%, rgba(22, 166, 174, 0.07), transparent 35%),
+    #f4f9fa;
+  color: #123052;
+}
+
+.citas-contenido {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+.citas-volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 24px;
+  color: #087f8c;
+  font-size: 0.92rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.citas-volver:hover {
+  color: #07566b;
+  text-decoration: underline;
+}
+
+.citas-portada {
+  position: relative;
+  display: flex;
+  min-height: 220px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  overflow: hidden;
+  margin-bottom: 30px;
+  padding: clamp(28px, 4vw, 50px);
+  border: 1px solid #dceff2;
+  border-radius: 25px;
+  background: linear-gradient(110deg, #fff 0%, #eef9fb 58%, #d9f1f4 100%);
+  box-shadow: 0 8px 28px rgba(18, 48, 82, 0.055);
+}
+
+.citas-portada::before {
+  position: absolute;
+  top: -55px;
+  right: 35%;
+  color: rgba(8, 127, 140, 0.06);
+  content: "🐾";
+  font-size: 160px;
+  pointer-events: none;
+}
+
+.citas-portada-texto {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+}
+
+.citas-marca {
+  display: inline-block;
+  margin: 0 0 10px;
+  color: #087f8c;
+  font-size: 0.73rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+}
+
+.citas-titulo {
+  margin: 0 0 12px;
+  color: #123052;
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 850;
+  letter-spacing: -0.045em;
+  line-height: 1.12;
+}
+
+.citas-descripcion {
+  max-width: 650px;
+  margin: 0;
+  color: #60748b;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.citas-beneficios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 22px;
+  margin-top: 20px;
+}
+
+.citas-beneficios span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #36536f;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.citas-beneficios span span {
+  color: #078b9a;
+  font-size: 1rem;
+}
+
+.citas-portada-ilustracion {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 10px;
+  padding-right: 12px;
+}
+
+.citas-portada-ilustracion > span:not(.citas-portada-huella) {
+  display: grid;
+  width: clamp(76px, 8vw, 108px);
+  height: clamp(76px, 8vw, 108px);
+  place-items: center;
+  border: 5px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(18, 48, 82, 0.09);
+  font-size: clamp(2.6rem, 4vw, 3.6rem);
+}
+
+.citas-portada-huella {
+  position: absolute;
+  top: -18px;
+  right: -8px;
+  font-size: 2rem;
+  transform: rotate(15deg);
+}
+
+.citas-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(280px, 0.8fr);
+  align-items: start;
+  gap: 26px;
+}
+
+.citas-panel {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #e0ebef;
+  border-radius: 23px;
+  background: #fff;
+  box-shadow: 0 7px 26px rgba(18, 48, 82, 0.045);
+}
+
+.citas-panel-encabezado {
+  padding: clamp(22px, 3vw, 34px);
+  border-bottom: 1px solid #edf2f4;
+}
+
+.citas-paso {
+  display: inline-block;
+  margin-bottom: 9px;
+  color: #087f8c;
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+}
+
+.citas-panel-encabezado h2 {
+  margin: 0 0 8px;
+  color: #123052;
+  font-size: clamp(1.45rem, 2.3vw, 1.9rem);
+  font-weight: 850;
+  letter-spacing: -0.025em;
+}
+
+.citas-panel-encabezado p {
+  margin: 0;
+  color: #718297;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.citas-panel-encabezado .citas-obligatorios {
+  margin-top: 12px;
+  color: #8493a2;
+  font-size: 0.8rem;
+}
+
+.citas-card {
+  padding: clamp(22px, 3vw, 34px);
+  background: #fff;
+  text-align: left;
+}
+
+.citas-campo {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 9px;
+  margin-bottom: 23px;
+}
+
+.citas-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: #29435e;
+  font-size: 0.9rem;
+  font-weight: 750;
+  text-align: left;
+}
+
+.citas-label > span:first-child {
+  color: #078b9a;
+}
+
+.citas-opcional {
+  color: #8493a2;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.citas-input,
+.citas-select,
+.citas-textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 13px 14px;
+  border: 1px solid #d6e5ea;
+  border-radius: 12px;
+  outline: none;
+  background: #fbfdfe;
+  color: #123052;
+  font: inherit;
+  font-size: 0.94rem;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.citas-input,
+.citas-select {
+  min-height: 50px;
+}
+
+.citas-textarea {
+  min-height: 112px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.citas-input:focus,
+.citas-select:focus,
+.citas-textarea:focus {
+  border-color: #0b99a5;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(22, 166, 174, 0.12);
+}
+
+.citas-input:focus-visible,
+.citas-select:focus-visible,
+.citas-textarea:focus-visible,
+.citas-boton:focus-visible {
+  outline: 2px solid #69cbd2;
+  outline-offset: 2px;
+}
+
+.citas-input:disabled,
+.citas-select:disabled,
+.citas-textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.citas-ayuda {
+  display: block;
+  margin-top: 0;
+  color: #8493a2;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.citas-fila {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 18px;
+}
+
+.citas-fila .citas-campo {
+  min-width: 0;
+}
+
+.citas-boton {
+  display: inline-flex;
+  width: 100%;
+  min-height: 51px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px 20px;
+  border: 1px solid #087f8c;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #0c94a0, #087080);
+  box-shadow: 0 6px 15px rgba(8, 127, 140, 0.18);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.94rem;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.citas-boton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #087f8c, #07566b);
+  box-shadow: 0 9px 20px rgba(8, 127, 140, 0.23);
+}
+
+.citas-boton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.citas-mensaje {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 18px;
+  padding: 15px 16px;
+  border: 1px solid;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 650;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.citas-mensaje > span {
+  display: grid;
+  width: 23px;
+  height: 23px;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.75);
+  font-weight: 850;
+}
+
+.citas-mensaje-exito {
+  border-color: #b8e5d1;
+  background: #eaf9f1;
+  color: #176343;
+}
+
+.citas-mensaje-error {
+  border-color: #f0c2c5;
+  background: #fff0f1;
+  color: #a52b3c;
+}
+
+.citas-sin-mascotas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 34px 25px;
+  text-align: center;
+}
+
+.citas-sin-mascotas > span {
+  display: grid;
+  width: 74px;
+  height: 74px;
+  place-items: center;
+  border-radius: 22px;
+  background: #eaf8fa;
+  font-size: 2.4rem;
+}
+
+.citas-sin-mascotas h3 {
+  margin: 18px 0 8px;
+  color: #123052;
+}
+
+.citas-sin-mascotas p {
+  max-width: 420px;
+  margin: 0 0 22px;
+  color: #718297;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.citas-sin-mascotas .citas-boton {
+  width: auto;
+}
+
+.citas-lateral {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.citas-lateral-tarjeta {
+  padding: 25px;
+  border: 1px solid #e0ebef;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 6px 20px rgba(18, 48, 82, 0.04);
+}
+
+.citas-lateral-icono {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  margin-bottom: 18px;
+  border-radius: 16px;
+  background: #e3f6f8;
+  font-size: 1.8rem;
+}
+
+.citas-lateral-tarjeta h3 {
+  margin: 0 0 10px;
+  color: #123052;
+  font-size: 1.13rem;
+  font-weight: 850;
+}
+
+.citas-lateral-tarjeta p {
+  margin: 0;
+  color: #718297;
+  font-size: 0.89rem;
+  line-height: 1.7;
+}
+
+.citas-lateral-horarios {
+  background: linear-gradient(145deg, #fff, #f5fbfc);
+}
+
+.citas-horarios-resumen {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 18px 0;
+}
+
+.citas-horarios-resumen span {
+  padding: 9px 5px;
+  border: 1px solid #dceff2;
+  border-radius: 9px;
+  background: #fff;
+  color: #087f8c;
+  font-size: 0.83rem;
+  font-weight: 750;
+  text-align: center;
+}
+
+.citas-lateral-horarios small {
+  display: block;
+  color: #8493a2;
+  font-size: 0.79rem;
+  line-height: 1.6;
+}
+
+.citas-lateral-ayuda {
+  padding: 20px;
+  border: 1px solid #dceff2;
+  border-radius: 17px;
+  background: #edf8fa;
+}
+
+.citas-lateral-ayuda > span {
+  color: #087f8c;
+  font-size: 1.2rem;
+  font-weight: 850;
+}
+
+.citas-lateral-ayuda p {
+  margin: 9px 0 12px;
+  color: #566f82;
+  font-size: 0.87rem;
+  line-height: 1.7;
+}
+
+.citas-lateral-ayuda a {
+  color: #087f8c;
+  font-size: 0.87rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.citas-lateral-ayuda a:hover {
+  text-decoration: underline;
+}
+
+.citas-pie {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 28px;
+  color: #718297;
+  font-size: 0.9rem;
+  font-style: italic;
+  text-align: center;
+}
+
+.citas-pie span {
+  color: #4c9fae;
+  font-size: 1.25rem;
+}
+
+@media (max-width: 1050px) {
+  .citas-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .citas-lateral {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .citas-lateral-ayuda {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 650px) {
+  .citas-page {
+    padding: 23px 15px 35px;
+  }
+
+  .citas-portada {
+    min-height: 0;
+    padding: 25px 21px;
+    border-radius: 20px;
+  }
+
+  .citas-portada-ilustracion {
+    display: none;
+  }
+
+  .citas-titulo {
+    font-size: 2.1rem;
+  }
+
+  .citas-beneficios {
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .citas-panel {
+    border-radius: 19px;
+  }
+
+  .citas-panel-encabezado,
+  .citas-card {
+    padding: 22px 18px;
+  }
+
+  .citas-fila {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .citas-lateral {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .citas-lateral-ayuda {
+    grid-column: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .citas-volver,
+  .citas-boton {
+    transition: none;
+  }
+}
