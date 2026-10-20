@@ -16,6 +16,7 @@ function guardarLista(clave, datos) {
   try {
     localStorage.setItem(clave, JSON.stringify(datos))
     if (clave === CLAVE_PACIENTES) window.dispatchEvent(new Event(EVENTO_PACIENTES))
+    if (clave === CLAVE_CITAS) window.dispatchEvent(new Event('vet:citas'))
     return true
   } catch { return false }
 }

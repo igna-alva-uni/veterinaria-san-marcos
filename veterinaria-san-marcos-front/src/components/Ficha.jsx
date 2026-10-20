@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { validarAtencion } from "../validaciones";
 import { servicios, medicamentos } from "../catalogo";
+import { fechaLocal } from '../data/panel.js';
+import { vacunaDeAtencion } from '../data/vacunas.js';
 
 export default function Ficha({ pacientes, setPacientes }) {
   const { id } = useParams();
@@ -13,6 +15,7 @@ export default function Ficha({ pacientes, setPacientes }) {
     medicamento: "",
     proximoControl: "",
     observacion: "",
+    vacuna: { nombre: '', vencimiento: '' },
   };
   const [f, setF] = useState(vacio);
   const [error, setError] = useState("");
@@ -40,6 +43,7 @@ export default function Ficha({ pacientes, setPacientes }) {
         ...historial,
         {
           ...f,
+          vacuna: f.vacuna.nombre.trim() ? { ...f.vacuna, nombre: f.vacuna.nombre.trim() } : null,
           id: Date.now(),
           tipo: f.tipo || servicios[0]?.nombre || "Consulta",
         },
@@ -71,7 +75,7 @@ export default function Ficha({ pacientes, setPacientes }) {
           <input
             required
             type="date"
-            max={new Date().toISOString().slice(0, 10)}
+            max={fechaLocal()}
             value={f.fecha}
             onChange={(e) => setF({ ...f, fecha: e.target.value })}
           />
@@ -121,6 +125,17 @@ export default function Ficha({ pacientes, setPacientes }) {
             onChange={(e) => setF({ ...f, proximoControl: e.target.value })}
           />
         </label>
+        <fieldset className="min-w-0 rounded-xl border border-[var(--border)] p-4 md:col-span-2">
+          <legend>Vacuna aplicada (opcional)</legend>
+          <p>Completa estos datos solo si se aplicó una vacuna. El vencimiento debe corresponder al registrado por el profesional.</p>
+          <label>Nombre de la vacuna
+            <input list="vacunas-catalogo" value={f.vacuna.nombre} onChange={e => setF({ ...f, vacuna: { ...f.vacuna, nombre: e.target.value } })} />
+          </label>
+          <datalist id="vacunas-catalogo">{servicios.filter(s => s.categoria === 'Vacunación').map(s => <option key={s.codigo} value={s.nombre} />)}</datalist>
+          <label>Vencimiento de la vacuna
+            <input type="date" required={Boolean(f.vacuna.nombre.trim())} min={f.fecha || undefined} value={f.vacuna.vencimiento} onChange={e => setF({ ...f, vacuna: { ...f.vacuna, vencimiento: e.target.value } })} />
+          </label>
+        </fieldset>
         <label>
           Indicaciones
           <textarea
@@ -141,12 +156,13 @@ export default function Ficha({ pacientes, setPacientes }) {
             </strong>
             <p>Diagnóstico: {h.diagnostico}</p>
             <p>Medicamento/vacuna: {h.medicamento || "No indicado"}</p>
+            {vacunaDeAtencion(h) && <><p>Vacuna aplicada: {vacunaDeAtencion(h).nombre}</p><p>Vencimiento de vacuna: {vacunaDeAtencion(h).vencimiento || 'No registrado'}</p></>}
             <p>Indicaciones: {h.observacion || "Sin indicaciones"}</p>
             <p>Próximo control: {h.proximoControl || "No definido"}</p>
             <button
               type="button"
               onClick={() => {
-                if (window.confirm("¿Eliminar esta atención simulada?"))
+                if (window.confirm("¿Eliminar esta atención?"))
                   actualizar({
                     historial: historial.filter((_, n) => n !== i),
                   });

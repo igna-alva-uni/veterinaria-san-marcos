@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import Header from '../Header.jsx'
 import Footer from '../Footer.jsx'
+import { clinica } from '../data/clinica.js'
 
 export default function MainLayout({ navigation, user, onLogin, onLogout, message }) {
   const { pathname } = useLocation()
@@ -13,7 +14,7 @@ export default function MainLayout({ navigation, user, onLogin, onLogout, messag
         {message && <div role="alert" className="layout-message">{message}</div>}
         <Outlet />
       </main>
-      <Footer />
+      <Footer contact={{ address: clinica.direccion, phone: clinica.telefono, email: clinica.correo, hours: clinica.horario }} />
     </>
   )
 }

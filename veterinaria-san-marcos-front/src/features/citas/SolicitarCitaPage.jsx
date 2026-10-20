@@ -35,7 +35,9 @@ function SolicitarCitaPage() {
   const [mascotaId, setMascotaId] = useState(
     () => parametros.get('mascotaId') || '',
   )
-  const [servicio, setServicio] = useState('')
+  const [servicio, setServicio] = useState(
+    () => serviciosCatalogo.find(s => s.codigo === parametros.get('servicio'))?.nombre || '',
+  )
   const [fecha, setFecha] = useState('')
   const [hora, setHora] = useState('')
   const [motivo, setMotivo] = useState('')
@@ -66,6 +68,7 @@ function SolicitarCitaPage() {
       fecha,
       hora,
       motivo,
+      precio: serviciosCatalogo.find(s => s.nombre === servicio)?.precio,
     })
 
     if (!resultado.ok) {

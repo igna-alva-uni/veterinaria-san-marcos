@@ -1,3 +1,6 @@
+import { fechaValida } from './data/vacunas.js';
+import { fechaLocal } from './data/panel.js';
+
 export const correoValido = (correo) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.trim());
 export const dominiosPorRol = {
@@ -47,16 +50,19 @@ export function validarPaciente(d) {
 }
 export function validarAtencion(
   d,
-  hoy = new Date().toISOString().slice(0, 10),
+  hoy = fechaLocal(),
 ) {
   if (
-    !/^\d{4}-\d{2}-\d{2}$/.test(d.fecha || "") ||
-    Number.isNaN(Date.parse(d.fecha)) ||
+    !fechaValida(d.fecha) ||
     d.fecha > hoy
   )
     return "La fecha debe ser válida y no futura";
   if (!textoRequerido(d.diagnostico)) return "Ingresa el diagnóstico";
-  if (d.proximoControl && d.proximoControl < d.fecha)
+  if (d.proximoControl && (!fechaValida(d.proximoControl) || d.proximoControl < d.fecha))
     return "El próximo control no puede ser anterior a la atención";
+  if (d.vacuna?.nombre?.trim() && (!fechaValida(d.vacuna.vencimiento) || d.vacuna.vencimiento <= d.fecha))
+    return "Ingresa un vencimiento de vacuna válido y posterior a su aplicación";
+  if (d.vacuna?.vencimiento && !d.vacuna.nombre?.trim())
+    return "Ingresa el nombre de la vacuna aplicada";
   return "";
 }

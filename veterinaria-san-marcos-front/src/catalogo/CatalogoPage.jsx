@@ -438,8 +438,7 @@ function CatalogoPage() {
         <aside className="catalogo-aviso">
           <span aria-hidden="true">ℹ️</span>
           <p>
-            <strong>Importante:</strong> el stock corresponde al catálogo
-            de referencia. Los medicamentos y vacunas deben utilizarse
+            <strong>Importante:</strong> el stock corresponde al catálogo. Los medicamentos y vacunas deben utilizarse
             bajo indicación de un profesional veterinario. Los servicios
             están sujetos a evaluación y confirmación de la clínica.
           </p>

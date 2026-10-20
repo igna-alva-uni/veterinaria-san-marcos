@@ -79,23 +79,24 @@ describe("Componentes e interacciones del módulo Daniel", () => {
     abrir();
     ingresar("admin@duocuc.cl", "Admin12345");
     expect(
-      screen.getByRole("heading", { name: "Gestión de usuarios" }),
+      screen.getByRole("heading", { name: "Resumen de administración" }),
     ).toBeInTheDocument();
   });
   it("permite acceso a recepción", () => {
     abrir();
     ingresar("recepcion@gmail.com", "Recepcion123");
     expect(
-      screen.getByRole("heading", { name: "Gestión de pacientes" }),
+      screen.getByRole("heading", { name: "Resumen de recepción" }),
     ).toBeInTheDocument();
   });
-  it("permite acceso al dueño y muestra solo sus mascotas", () => {
+  it("lleva al dueño a Inicio después de iniciar sesión", () => {
     abrir();
     ingresar("cliente@profesor.duoc.cl", "Cliente123");
     expect(
-      screen.getByRole("heading", { name: "Mi perfil" }),
+      screen.getByRole("heading", { name: /Cuidamos a quienes/ }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Luna · Perro/)).toBeInTheDocument();
+    expect(window.location.pathname).toBe("/inicio");
+    expect(screen.getByRole("heading", { name: "Mis mascotas" })).toBeInTheDocument();
   });
   it("impide acceder a administración desde rol dueño", () => {
     abrir("/admin/usuarios", dueno);
@@ -427,7 +428,7 @@ describe('Integración de navegación y sesión', () => {
   it('incluye navegación administrativa y cierra el menú con Escape', () => {
     abrir('/admin/usuarios', admin);
     const header = screen.getByRole('banner');
-    expect(within(header).getByRole('link', { name: 'Reportes' })).toBeInTheDocument();
+    expect(within(header).getByRole('link', { name: 'Administración' })).toBeInTheDocument();
     const toggle = within(header).getByRole('button', { name: 'Abrir menú de navegación' });
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
@@ -536,5 +537,30 @@ describe('Layouts y rutas anidadas', () => {
     expect(container.querySelectorAll('.site-header')).toHaveLength(1);
     expect(screen.getAllByRole('main')).toHaveLength(1);
     expect(container.querySelectorAll('.site-footer')).toHaveLength(1);
+  });
+});
+
+describe('Acceso a las portadas de los paneles', () => {
+  it('abre administración desde el navbar y conserva el acceso a la gestión', () => {
+    abrir('/inicio', admin);
+    fireEvent.click(within(screen.getByRole('banner')).getByRole('link',{name:'Administración',exact:true}));
+    expect(window.location.pathname).toBe('/admin');
+    expect(screen.getByRole('heading',{name:'Resumen de administración'})).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', {name:'Cerrar sesión'}));
+    expect(screen.getByRole('heading',{name:'Iniciar sesión'})).toBeInTheDocument();
+  });
+  it('rechaza al dueño en la portada administrativa', () => {
+    abrir('/admin',dueno);
+    expect(screen.getByRole('alert')).toHaveTextContent('Acceso denegado');
+    expect(screen.queryByRole('heading',{name:'Resumen de administración'})).not.toBeInTheDocument();
+  });
+  it('guarda una consulta de contacto antes de confirmar su registro', () => {
+    abrir('/contacto',dueno);
+    fireEvent.change(screen.getByLabelText('Nombre'),{target:{value:'Cliente'}});
+    fireEvent.change(screen.getByLabelText('Correo'),{target:{value:'cliente@profesor.duoc.cl'}});
+    fireEvent.change(screen.getByLabelText('Consulta'),{target:{value:'Necesito consultar un horario'}});
+    fireEvent.click(screen.getByRole('button',{name:'Enviar consulta'}));
+    expect(screen.getByRole('alert')).toHaveTextContent('Consulta registrada');
+    expect(JSON.parse(localStorage.getItem('vet_consultas'))).toEqual(expect.arrayContaining([expect.objectContaining({usuarioId:3,consulta:'Necesito consultar un horario'})]));
   });
 });

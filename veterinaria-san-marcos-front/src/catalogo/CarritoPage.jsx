@@ -208,13 +208,13 @@ function CarritoPage() {
           <h2>¡Pedido registrado!</h2>
           <p>
             Gracias, {pedidoRealizado.cliente.nombre}. Tu pedido quedó guardado
-            en este navegador y está pendiente de confirmación por la clínica.
+            y está pendiente de confirmación por la clínica.
           </p>
           <p style={{ marginTop: 18 }}>
             <strong>Número de pedido: {pedidoRealizado.numero}</strong>
           </p>
           <p style={{ marginTop: 10 }}>
-            Total referencial: <strong>{formatoPrecio(pedidoRealizado.total)}</strong>
+            Total: <strong>{formatoPrecio(pedidoRealizado.total)}</strong>
           </p>
           <p style={{ marginTop: 10 }}>
             No se ha realizado ningún cobro ni se ha coordinado un despacho.
@@ -391,7 +391,7 @@ function CarritoPage() {
               </div>
 
               <div className="carrito-resumen-total">
-                <span>Total referencial del pedido</span>
+                <span>Total del pedido</span>
                 <strong>{formatoPrecio(precioTotal)}</strong>
               </div>
 
@@ -432,7 +432,7 @@ function CarritoPage() {
               <span>Despacho</span><strong>Por confirmar</strong>
             </div>
             <div className="carrito-resumen-total">
-              <span>Total referencial</span><strong>{formatoPrecio(precioTotal)}</strong>
+              <span>Total</span><strong>{formatoPrecio(precioTotal)}</strong>
             </div>
           </aside>
         </div>
@@ -603,7 +603,7 @@ function CarritoPage() {
                 <span>Despacho</span><strong>Por confirmar</strong>
               </div>
               <div className="carrito-resumen-total">
-                <span>Total referencial</span><strong>{formatoPrecio(precioTotal)}</strong>
+                <span>Total</span><strong>{formatoPrecio(precioTotal)}</strong>
               </div>
               <button
                 type="button"
@@ -617,7 +617,7 @@ function CarritoPage() {
               </button>
               <p className="carrito-nota">
                 Los servicios requieren confirmación de la clínica. El despacho
-                y la disponibilidad deben confirmarse. El total es referencial.
+                y la disponibilidad deben confirmarse.
               </p>
               <Link to="/catalogo" className="carrito-seguir-resumen">
                 + Agregar más elementos

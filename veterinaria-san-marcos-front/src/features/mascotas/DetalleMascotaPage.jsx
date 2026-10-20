@@ -7,6 +7,7 @@ import {
   obtenerMascotaPorId,
 } from '../../data/veterinaria.js'
 import './DetalleMascotaPage.css'
+import HistorialClinico from '../../components/HistorialClinico.jsx'
 
 const especies = {
   Perro: '🐶',
@@ -16,11 +17,11 @@ const especies = {
   Otro: '🐾',
 }
 
-function DetalleMascotaPage() {
+function DetalleMascotaPage({ pacientes = [], usuario }) {
   const { id } = useParams()
   const navigate = useNavigate()
 
-  const [mascota, setMascota] = useState(() => obtenerMascotaPorId(id))
+  const mascota = pacientes.find(p => String(p.id) === String(id) && String(p.duenoId) === String(usuario?.id)) || null
   const [editando, setEditando] = useState(false)
   const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState('')
@@ -54,7 +55,6 @@ function DetalleMascotaPage() {
     }
 
     const mascotaActualizada = obtenerMascotaPorId(id)
-    setMascota(mascotaActualizada)
     setFormulario({
       nombre: mascotaActualizada.nombre ?? '',
       especie: mascotaActualizada.especie ?? 'Perro',
@@ -278,6 +278,8 @@ function DetalleMascotaPage() {
           </div>
         )}
       </section>
+
+      <HistorialClinico mascota={mascota} />
 
       {!editando && (
         <>

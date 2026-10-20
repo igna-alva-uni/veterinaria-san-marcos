@@ -1,7 +1,7 @@
-import { Outlet } from 'react-router-dom'
+import { NavLink, Outlet } from 'react-router-dom'
 
 // Se anida dentro de MainLayout: no vuelve a crear Header, Footer ni main.
-export default function DashboardLayout({ title }) {
+export default function DashboardLayout({ title, homePath }) {
   return (
     <section className="dashboard-layout" aria-label={title}>
       <div className="dashboard-layout__heading">
@@ -14,6 +14,7 @@ export default function DashboardLayout({ title }) {
           </svg>
         </span>
         <p>{title}</p>
+        <NavLink className="dashboard-layout__home" to={homePath} end>Resumen del panel <span aria-hidden="true">↗</span></NavLink>
       </div>
       <Outlet />
     </section>

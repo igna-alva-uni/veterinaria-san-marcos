@@ -155,3 +155,8 @@
 }
 .dashboard-layout__icon { display: inline-flex; }
 .dashboard-layout__icon svg { width: 20px; height: 20px; }
+
+.dashboard-layout__heading { flex-wrap: wrap; }
+.dashboard-layout__home { display: inline-flex; align-items: center; min-height: 44px; gap: 8px; margin-left: auto; font-size: 0.8rem; font-weight: 650; text-decoration: none; }
+.dashboard-layout__home:hover { text-decoration: underline; }
+.dashboard-layout__home[aria-current="page"] { color: var(--text-h); }

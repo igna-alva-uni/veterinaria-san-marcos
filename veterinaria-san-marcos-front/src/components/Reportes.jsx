@@ -13,7 +13,7 @@ export default function Reportes({ pacientes, usuarios }) {
   return (
     <section className="tarjeta">
       <h1>Reportes administrativos</h1>
-      <p>Indicadores calculados con información simulada.</p>
+      <p>Indicadores calculados a partir de las atenciones registradas.</p>
       <div className="metricas">
         <div>
           <strong>{pacientes.length}</strong>

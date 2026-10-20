@@ -30,7 +30,10 @@ import DashboardLayout from './layouts/DashboardLayout.jsx';
 import ContentLayout from './layouts/ContentLayout.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import { mainNavigation } from './navigation.js';
-import { servicios } from './catalogo.js';
+import { clinica } from './data/clinica.js';
+import InicioPage from './features/clinica/InicioPage.jsx';
+import ServiciosPage from './features/clinica/ServiciosPage.jsx';
+import UbicacionPage from './features/clinica/UbicacionPage.jsx';
 import MascotasPage from './features/mascotas/MascotasPage.jsx';
 import DetalleMascotaPage from './features/mascotas/DetalleMascotaPage.jsx';
 import SolicitarCitaPage from './features/citas/SolicitarCitaPage.jsx';
@@ -39,6 +42,7 @@ import DetalleCitaPage from './features/citas/DetalleCitaPage.jsx';
 import RecepcionSolicitudesPage from './features/citas/RecepcionSolicitudesPage.jsx';
 import CatalogoPage from './catalogo/CatalogoPage.jsx';
 import CarritoPage from './catalogo/CarritoPage.jsx';
+import PanelPage from './features/dashboard/PanelPage.jsx';
 import { EVENTO_PACIENTES, leerPacientesCompartidos } from './data/veterinaria.js';
 const leer = (clave, defecto) => {
   try {
@@ -67,12 +71,10 @@ function AppInterna() {
       { label: 'Mis mascotas', href: '/mascotas' }, { label: 'Solicitar cita', href: '/citas/nueva' }, { label: 'Mis citas', href: '/mis-citas' },
     ] : []),
     ...(sesion?.rol === 'Administrador' ? [
-      { label: 'Usuarios', href: '/admin/usuarios' },
-      { label: 'Reportes', href: '/admin/reportes' },
+      { label: 'Administración', href: '/admin' },
     ] : []),
     ...(['Administrador', 'Recepcionista'].includes(sesion?.rol) ? [
-      { label: 'Pacientes', href: '/recepcion/pacientes' },
-      { label: 'Solicitudes', href: '/recepcion/solicitudes' },
+      { label: 'Recepción', href: '/recepcion' },
     ] : []),
     ...(sesion ? [{ label: 'Carrito', href: '/carrito' }] : []),
   ];
@@ -118,10 +120,10 @@ function AppInterna() {
     setSesion(usuario);
     ir(
       usuario.rol === "Administrador"
-        ? "/admin/usuarios"
+        ? "/admin"
         : usuario.rol === "Recepcionista"
-          ? "/recepcion/pacientes"
-          : "/perfil",
+          ? "/recepcion"
+          : "/inicio",
     );
   };
   const registrar = (datos) => {
@@ -149,7 +151,7 @@ function AppInterna() {
     };
     setUsuarios((v) => [...v, nuevo]);
     setMensaje(
-      "Registro de demostración creado. Ingresa con tu correo y contraseña.",
+      "Cuenta creada. Ingresa con tu correo y contraseña.",
     );
     navegar("/login");
   };
@@ -208,41 +210,7 @@ function AppInterna() {
         <Route path="/" element={<Navigate to={sesion ? "/inicio" : "/login"} replace />} />
         <Route element={<ProtectedRoute user={sesion} roles={roles} />}>
           <Route element={<ContentLayout />}>
-            <Route
-              path="/inicio"
-              element={
-                <section className="tarjeta">
-                  <h1>Bienvenido a Veterinaria San Marcos</h1>
-                  <p>Hola, {sesion?.nombre}. Consulta tu perfil y accede a las opciones disponibles para tu rol.</p>
-                  <Link className="site-button" to="/perfil">Ver mi perfil</Link>
-                </section>
-              }
-            />
-            <Route
-              path="/servicios"
-              element={
-                <section className="tarjeta">
-                  <h1>Servicios veterinarios</h1>
-                  <p>Catálogo de demostración del proyecto.</p>
-                  <ul className="grid gap-4 md:grid-cols-2">
-                    {servicios.map(servicio => <li className="rounded-xl border border-[var(--border)] p-4" key={servicio.codigo}>
-                      <h2>{servicio.nombre}</h2><p>{servicio.especie}</p>
-                    </li>)}
-                  </ul>
-                </section>
-              }
-            />
-            <Route
-              path="/ubicacion"
-              element={
-                <section className="tarjeta">
-                  <h1>Ubicación de la clínica</h1>
-                  <p>Rancagua, Región de O’Higgins.</p>
-                  <p>La dirección exacta y el mapa se incorporarán cuando el equipo confirme la ubicación.</p>
-                  <Link to="/contacto">Contactar a la clínica</Link>
-                </section>
-              }
-            />
+
             <Route
               path="/perfil"
               element={
@@ -298,45 +266,54 @@ function AppInterna() {
                   <h1>Contacto</h1>
                   <p>Veterinaria San Marcos · Rancagua, Chile.</p>
                   <p>
-                    Dirección y teléfono oficiales pendientes de confirmación por el
-                    equipo.
+                    {clinica.direccion}
                   </p>
+                  <Link to="/ubicacion">Ver mapa e indicaciones</Link>
                   <Formulario
                     key="contacto"
-                    titulo="Formulario de contacto (demostración)"
+                    titulo="Formulario de contacto"
                     campos={[
                       ["nombre", "Nombre"],
                       ["correo", "Correo", "email"],
                       ["consulta", "Consulta", "textarea"],
                     ]}
                     boton="Enviar consulta"
-                    enviar={(d) =>
-                      setMensaje(
-                        textoRequerido(d.consulta) && correoValido(d.correo)
-                          ? "Consulta registrada solo en esta demostración"
-                          : "Completa los datos correctamente",
-                      )
-                    }
+                    enviar={(d) => {
+                      if (!textoRequerido(d.nombre) || !textoRequerido(d.consulta) || !correoValido(d.correo)) {
+                        setMensaje('Completa los datos correctamente');
+                        return;
+                      }
+                      try {
+                        const guardadas = leer('vet_consultas', []);
+                        const consultas = Array.isArray(guardadas) ? guardadas : [];
+                        localStorage.setItem('vet_consultas', JSON.stringify([...consultas, {
+                          ...d, id: Date.now(), usuarioId: sesion.id, fecha: new Date().toISOString(),
+                        }]));
+                        setMensaje('Consulta registrada');
+                      } catch { setMensaje('No se pudo guardar la consulta. Inténtalo nuevamente.'); }
+                    }}
                   />
                 </section>
               }
             />
           </Route>
           <Route element={<ContentLayout variant="feature" />}>
+            <Route path="/inicio" element={<InicioPage usuario={sesion} pacientes={pacientes} />} />
+            <Route path="/servicios" element={<ServiciosPage usuario={sesion} />} />
+            <Route path="/ubicacion" element={<UbicacionPage />} />
             <Route path="/catalogo" element={<CatalogoPage key={sesion?.id} />} />
             <Route path="/carrito" element={<CarritoPage key={sesion?.id} />} />
             <Route path="/mis-citas" element={<MisCitasPage />} />
             <Route path="/mis-citas/:id" element={<DetalleCitaPage key={pathname} />} />
             <Route element={<ProtectedRoute user={sesion} roles={['Dueño']} />}>
               <Route path="/mascotas" element={<MascotasPage />} />
-              <Route path="/mascotas/:id" element={<DetalleMascotaPage key={pathname} />} />
+              <Route path="/mascotas/:id" element={<DetalleMascotaPage key={pathname} pacientes={pacientes} usuario={sesion} />} />
               <Route path="/citas/nueva" element={<SolicitarCitaPage />} />
             </Route>
           </Route>
           <Route element={<ProtectedRoute user={sesion} roles={['Administrador', 'Recepcionista']} />}>
-            <Route element={<DashboardLayout title="Panel de recepción" />}>
+            <Route element={<DashboardLayout title="Panel de recepción" homePath="/recepcion" />}>
               <Route element={<ContentLayout />}>
-                <Route path="/recepcion" element={<Navigate to="/recepcion/pacientes" replace />} />
                 <Route
                   path="/recepcion/pacientes"
                   element={
@@ -351,14 +328,14 @@ function AppInterna() {
                 <Route path="/recepcion/pacientes/:id" element={<Ficha pacientes={pacientes} setPacientes={setPacientes} />} />
               </Route>
               <Route element={<ContentLayout variant="feature" />}>
+                <Route path="/recepcion" element={<PanelPage tipo="recepcion" usuario={sesion} usuarios={usuarios} pacientes={pacientes} />} />
                 <Route path="/recepcion/solicitudes" element={<RecepcionSolicitudesPage />} />
               </Route>
             </Route>
           </Route>
           <Route element={<ProtectedRoute user={sesion} roles={['Administrador']} />}>
-            <Route element={<DashboardLayout title="Panel de administración" />}>
+            <Route element={<DashboardLayout title="Panel de administración" homePath="/admin" />}>
               <Route element={<ContentLayout />}>
-                <Route path="/admin" element={<Navigate to="/admin/usuarios" replace />} />
                 <Route
                   path="/admin/usuarios"
                   element={
@@ -372,6 +349,9 @@ function AppInterna() {
                   }
                 />
                 <Route path="/admin/reportes" element={<Reportes pacientes={pacientes} usuarios={usuarios} />} />
+              </Route>
+              <Route element={<ContentLayout variant="feature" />}>
+                <Route path="/admin" element={<PanelPage tipo="admin" usuario={sesion} usuarios={usuarios} pacientes={pacientes} />} />
               </Route>
             </Route>
           </Route>

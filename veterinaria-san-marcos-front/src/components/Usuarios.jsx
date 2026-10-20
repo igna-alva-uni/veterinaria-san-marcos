@@ -1,7 +1,6 @@
 import { useState } from "react";
 import NombreUsuarioEditable from "./NombreUsuarioEditable";
-import Formulario from "./Formulario";
-import { correoValidoParaRol, claveValida, textoRequerido } from "../validaciones";
+import FormularioUsuario from "./FormularioUsuario.jsx";
 
 export default function Usuarios({
   usuarios,
@@ -12,53 +11,33 @@ export default function Usuarios({
 }) {
   const [busqueda, setBusqueda] = useState("");
   const [nuevo, setNuevo] = useState(false);
+  const [editando, setEditando] = useState(null);
   return (
     <section className="tarjeta">
       <h1>Gestión de usuarios</h1>
-      <p>Administración de cuentas y roles (datos simulados).</p>
+      <p>Administra las cuentas, los roles y el acceso al sistema.</p>
       <input
         placeholder="Buscar por nombre o correo"
         value={busqueda}
         onChange={(e) => setBusqueda(e.target.value)}
       />
-      <button onClick={() => setNuevo(!nuevo)}>
+      <button onClick={() => { setNuevo(!nuevo); setEditando(null); }}>
         {nuevo ? "Cancelar" : "Crear usuario"}
       </button>
-      {nuevo && (
-        <Formulario
-          titulo="Nuevo usuario"
-          campos={[
-            ["nombre", "Nombre"],
-            ["correo", "Correo", "email"],
-            ["clave", "Contraseña", "password"],
-          ]}
-          boton="Guardar"
-          enviar={(d) => {
-            if (
-              !textoRequerido(d.nombre) ||
-              !correoValidoParaRol(d.correo, "Dueño") ||
-              !claveValida(d.clave || "") ||
-              usuarios.some(
-                (u) => u.correo.toLowerCase() === d.correo.toLowerCase(),
-              )
-            ) {
-              setMensaje(
-                "Revisa nombre, correo @profesor.duoc.cl, contraseña (mínimo 8 caracteres) o correo duplicado",
-              );
-              return;
-            }
-            setUsuarios((v) => [
-              ...v,
-              {
-                ...d,
-                nombre: d.nombre.trim(),
-                correo: d.correo.trim().toLowerCase(),
-                id: Date.now(),
-                rol: "Dueño",
-                activo: true,
-              },
-            ]);
+      {(nuevo || editando) && (
+        <FormularioUsuario
+          key={editando?.id || 'nuevo'}
+          usuario={editando}
+          usuarios={usuarios}
+          propio={editando?.id === sesion.id}
+          cancelar={() => { setNuevo(false); setEditando(null); }}
+          guardar={(datos) => {
+            setUsuarios(actuales => editando
+              ? actuales.map(u => u.id === editando.id ? { ...u, nombre: datos.nombre, correo: datos.correo, rol: datos.rol } : u)
+              : [...actuales, { ...datos, id: Math.max(0, ...actuales.map(u => Number(u.id))) + 1, activo: true }]);
+            setMensaje(editando ? 'Usuario actualizado correctamente' : 'Usuario creado correctamente');
             setNuevo(false);
+            setEditando(null);
           }}
         />
       )}
@@ -105,33 +84,11 @@ export default function Usuarios({
                     </td>
                     <td>{u.correo}</td>
                     <td>
-                      <select
-                        aria-label={"Rol " + u.id}
-                        value={u.rol}
-                        disabled={u.id === sesion.id}
-                        onChange={(e) => {
-                          if (!correoValidoParaRol(u.correo, e.target.value)) {
-                            setMensaje(
-                              "El correo de este usuario no corresponde al dominio requerido para ese rol",
-                            );
-                            return;
-                          }
-                          setUsuarios((v) =>
-                            v.map((x) =>
-                              x.id === u.id ? { ...x, rol: e.target.value } : x,
-                            ),
-                          );
-                        }}
-                      >
-                        {["Administrador", "Recepcionista", "Dueño"].map(
-                          (r) => (
-                            <option key={r}>{r}</option>
-                          ),
-                        )}
-                      </select>
+                      {u.rol}
                     </td>
                     <td>{u.activo ? "Activo" : "Inactivo"}</td>
                     <td>
+                      <button type="button" aria-label={`Editar usuario ${u.nombre}`} onClick={() => { setEditando(u); setNuevo(false); }}>Editar usuario</button>
                       <button
                         disabled={u.id === sesion.id}
                         onClick={() =>
