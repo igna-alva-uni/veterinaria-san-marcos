@@ -10,7 +10,7 @@
   background:
     radial-gradient(ellipse at 8% 0%, rgba(22, 166, 174, 0.07), transparent 35%),
     #f4f9fa;
-  color: #123052;
+  color: var(--text-h);
 }
 
 .mascotas-contenido {
@@ -69,7 +69,7 @@
 .mascotas-etiqueta {
   display: inline-block;
   margin-bottom: 9px;
-  color: #087f8c;
+  color: var(--accent);
   font-size: 0.73rem;
   font-weight: 850;
   letter-spacing: 0.12em;
@@ -77,7 +77,7 @@
 
 .mascotas-banner h1 {
   margin: 0 0 12px;
-  color: #123052;
+  color: var(--text-h);
   font-size: clamp(2.1rem, 4vw, 3.2rem);
   font-weight: 850;
   letter-spacing: -0.045em;
@@ -137,7 +137,7 @@
 .mascotas-encabezado h2,
 .mascotas-listado h2 {
   margin: 0 0 7px;
-  color: #123052;
+  color: var(--text-h);
   font-size: clamp(1.35rem, 2.3vw, 1.8rem);
   font-weight: 850;
   letter-spacing: -0.025em;
@@ -170,8 +170,8 @@
 
 .mascotas-boton-principal {
   flex-shrink: 0;
-  border: 1px solid #087f8c;
-  background: linear-gradient(135deg, #087f8c, #10a6ad);
+  border: 1px solid var(--accent);
+  background: linear-gradient(135deg, var(--accent), #10a6ad);
   color: #ffffff;
   box-shadow: 0 5px 14px rgba(8, 127, 140, 0.18);
 }
@@ -264,7 +264,7 @@
 }
 
 .mascotas-resumen-card strong {
-  color: #123052;
+  color: var(--text-h);
   font-size: 1.8rem;
   font-weight: 850;
 }
@@ -286,7 +286,7 @@
 
 .mascotas-formulario-titulo h2 {
   margin: 0 0 8px;
-  color: #123052;
+  color: var(--text-h);
   font-size: 1.6rem;
   font-weight: 850;
 }
@@ -310,7 +310,7 @@
 }
 
 .mascotas-campo label {
-  color: #29435e;
+  color: var(--text);
   font-size: 0.9rem;
   font-weight: 750;
 }
@@ -324,7 +324,7 @@
   border-radius: 10px;
   outline: none;
   background: #fbfdfe;
-  color: #123052;
+  color: var(--text-h);
   font-family: inherit;
   font-size: 0.95rem;
 }
@@ -368,7 +368,7 @@
   border-radius: 12px;
   outline: none;
   background: #fbfdfe;
-  color: #123052;
+  color: var(--text-h);
   font-family: inherit;
   font-size: 0.95rem;
 }
@@ -428,7 +428,7 @@
   border: 1px solid #c9e9eb;
   border-radius: 999px;
   background: #eaf8f9;
-  color: #087f8c;
+  color: var(--accent);
   font-size: 0.78rem;
   font-weight: 750;
 }
@@ -439,7 +439,7 @@
 
 .mascota-card-contenido h3 {
   margin: 0 0 5px;
-  color: #123052;
+  color: var(--text-h);
   font-size: 1.35rem;
   font-weight: 850;
 }
@@ -474,7 +474,7 @@
 
 .mascota-datos strong {
   overflow-wrap: anywhere;
-  color: #29435e;
+  color: var(--text);
   font-size: 0.88rem;
 }
 
@@ -496,7 +496,7 @@
 .mascota-ver-detalle {
   border: 1px solid #cfe7eb;
   background: #f0fafb;
-  color: #087f8c;
+  color: var(--accent);
 }
 
 .mascota-ver-detalle:hover {
@@ -505,8 +505,8 @@
 
 .mascota-solicitar-cita {
   margin-top: 10px;
-  border: 1px solid #087f8c;
-  background: #087f8c;
+  border: 1px solid var(--accent);
+  background: var(--accent);
   color: #ffffff;
 }
 
@@ -536,7 +536,7 @@
 
 .mascotas-vacio h3 {
   margin: 0 0 8px;
-  color: #29435e;
+  color: var(--text);
 }
 
 .mascotas-vacio p {

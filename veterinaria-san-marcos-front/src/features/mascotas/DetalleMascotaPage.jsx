@@ -99,7 +99,7 @@ function DetalleMascotaPage() {
 
   if (!mascota) {
     return (
-      <main className="detalle-mascota-contenedor">
+      <div className="detalle-mascota-contenedor">
         <section className="detalle-mascota-no-encontrada">
           <h1>Mascota no encontrada</h1>
           <p>La mascota no existe o pudo haber sido eliminada.</p>
@@ -107,12 +107,12 @@ function DetalleMascotaPage() {
             Volver al catálogo
           </Link>
         </section>
-      </main>
+      </div>
     )
   }
 
   return (
-    <main className="detalle-mascota-contenedor">
+    <div className="detalle-mascota-contenedor">
       <Link className="detalle-mascota-volver" to="/mascotas">
         ← Volver a mascotas
       </Link>
@@ -328,7 +328,7 @@ function DetalleMascotaPage() {
       <p className="detalle-mascota-nota">
         Los cambios se guardan en el almacenamiento local de este navegador.
       </p>
-    </main>
+    </div>
   )
 }
 

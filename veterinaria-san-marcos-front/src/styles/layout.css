@@ -81,3 +81,13 @@
 @media (max-width: 960px) {
   .site-nav { flex: 0 0 100%; justify-content: flex-start; }
 }
+
+/* Las páginas integradas comparten el ancho y la altura del layout principal. */
+.feature-module { min-width: 0; }
+.feature-module > div {
+  width: 100%;
+  max-width: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+}

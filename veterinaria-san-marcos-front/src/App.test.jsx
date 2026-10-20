@@ -436,3 +436,30 @@ describe('Integración de navegación y sesión', () => {
     expect(toggle).toHaveFocus();
   });
 });
+
+describe('Rutas integradas de mascotas, citas y catálogo', () => {
+  it('conecta Mis mascotas con los pacientes existentes y la navegación compartida', () => {
+    abrir('/mascotas', dueno);
+    expect(screen.getByRole('heading', {name:'Mis mascotas',exact:true})).toBeInTheDocument();
+    expect(within(screen.getByRole('navigation', {name:'Navegación principal'})).getByRole('link', {name:'Solicitar cita'})).toBeInTheDocument();
+  });
+  it('protege recepción frente al dueño y los módulos nuevos frente a visitantes', () => {
+    abrir('/recepcion/solicitudes', dueno);
+    expect(screen.getByText(/Acceso denegado/)).toBeInTheDocument();
+    cleanup();
+    localStorage.clear();
+    abrir('/catalogo');
+    expect(screen.getByRole('heading', {name:'Iniciar sesión'})).toBeInTheDocument();
+  });
+  it('mantiene la cantidad de un servicio en uno al agregarlo dos veces', () => {
+    abrir('/catalogo', dueno);
+    const tarjeta = screen.getByRole('heading', {name:'Consulta general',exact:true}).closest('article');
+    const agregar = within(tarjeta).getByRole('button', {name:/Agregar/});
+    fireEvent.click(agregar);
+    fireEvent.click(agregar);
+    expect(JSON.parse(localStorage.getItem('vsm-carrito:3')).find(p=>p.codigo==='SV001').cantidad).toBe(1);
+    fireEvent.click(within(screen.getByRole('banner')).getByRole('link',{name:'Carrito',exact:true}));
+    expect(screen.getByRole('heading',{name:'Mi carrito'})).toBeInTheDocument();
+    expect(screen.getByText('1 servicio')).toBeInTheDocument();
+  });
+});

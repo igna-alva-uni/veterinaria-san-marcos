@@ -51,7 +51,7 @@ function MascotasPage() {
   }
 
   return (
-    <main className="mascotas-page">
+    <div className="mascotas-page">
       <div className="mascotas-contenido">
         <section className="mascotas-banner">
           <div className="mascotas-banner-texto">
@@ -79,7 +79,7 @@ function MascotasPage() {
           </div>
         </section>
 
-        <header className="mascotas-encabezado">
+        <div className="mascotas-encabezado">
           <div>
             <h2>Tu familia animal</h2>
             <p>Administra las mascotas que tienes registradas.</p>
@@ -95,7 +95,7 @@ function MascotasPage() {
           >
             {mostrarFormulario ? 'Cancelar' : '+ Registrar mascota'}
           </button>
-        </header>
+        </div>
 
         {mensaje && (
           <div
@@ -324,7 +324,7 @@ function MascotasPage() {
           )}
         </section>
       </div>
-    </main>
+    </div>
   )
 }
 

@@ -1,3 +1,4 @@
+import { claveCompra, leerCarritoUsuario } from '../data/compra.js'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
@@ -24,19 +25,7 @@ const ICONOS_CATEGORIA = {
   Otros: '🐶',
 }
 
-const CLAVE_CARRITO = 'vsm-carrito'
-
-function leerCarrito() {
-  try {
-    const guardado = localStorage.getItem(CLAVE_CARRITO)
-    if (!guardado) return []
-
-    const datos = JSON.parse(guardado)
-    return Array.isArray(datos) ? datos : []
-  } catch {
-    return []
-  }
-}
+function leerCarrito() { return leerCarritoUsuario() }
 
 function guardarEnCarrito(elemento) {
   const carrito = leerCarrito()
@@ -56,13 +45,13 @@ function guardarEnCarrito(elemento) {
   }
 
   if (existente) {
-    existente.cantidad = (existente.cantidad ?? 0) + 1
+    existente.cantidad = elemento.tipo === 'servicio' ? 1 : (existente.cantidad ?? 0) + 1
   } else {
     carrito.push({ ...elemento, cantidad: 1 })
   }
 
   try {
-    localStorage.setItem(CLAVE_CARRITO, JSON.stringify(carrito))
+    localStorage.setItem(claveCompra('vsm-carrito'), JSON.stringify(carrito))
 
     return {
       ok: true,
@@ -180,7 +169,7 @@ function CatalogoPage() {
   }
 
   return (
-    <main className="catalogo-page">
+    <div className="catalogo-page">
       {aviso && (
         <div
           className={`catalogo-toast ${
@@ -239,7 +228,7 @@ function CatalogoPage() {
       </section>
 
       <section className="catalogo-contenido">
-        <header className="catalogo-titulo-seccion">
+        <div className="catalogo-titulo-seccion">
           <div>
             <span className="catalogo-etiqueta">
               NUESTRO CATÁLOGO
@@ -258,7 +247,7 @@ function CatalogoPage() {
                 : 'elementos encontrados'}
             </span>
           </div>
-        </header>
+        </div>
 
         <div className="catalogo-filtros">
           <label className="catalogo-busqueda">
@@ -456,7 +445,7 @@ function CatalogoPage() {
           </p>
         </aside>
       </section>
-    </main>
+    </div>
   )
 }
 

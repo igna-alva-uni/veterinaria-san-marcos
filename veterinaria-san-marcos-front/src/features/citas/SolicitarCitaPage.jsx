@@ -1,4 +1,5 @@
-﻿
+import { serviciosCatalogo } from '../../data/catalogo.js'
+
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
@@ -7,13 +8,7 @@ import {
 } from '../../data/veterinaria.js'
 import './SolicitarCitaPage.css'
 
-const servicios = [
-  'Consulta veterinaria',
-  'Vacunación',
-  'Desparasitación',
-  'Control general',
-  'Exámenes',
-]
+const servicios = serviciosCatalogo.map(servicio => servicio.nombre)
 
 const horarios = [
   '09:00',
@@ -91,7 +86,7 @@ function SolicitarCitaPage() {
   }
 
   return (
-    <main className="citas-page">
+    <div className="citas-page">
       <div className="citas-contenido">
         <Link className="citas-volver" to="/mascotas">
           <span aria-hidden="true">←</span> Volver a mis mascotas
@@ -120,12 +115,12 @@ function SolicitarCitaPage() {
 
         <div className="citas-layout">
           <section className="citas-panel">
-            <header className="citas-panel-encabezado">
+            <div className="citas-panel-encabezado">
               <span className="citas-paso">PASO 1 · DATOS DE ATENCIÓN</span>
               <h2>Solicitar una cita</h2>
               <p>Completa los campos para registrar tu solicitud.</p>
               <p className="citas-obligatorios">Los campos marcados con * son obligatorios.</p>
-            </header>
+            </div>
 
             {mascotas.length === 0 ? (
               <div className="citas-sin-mascotas" role="status">
@@ -295,7 +290,7 @@ function SolicitarCitaPage() {
           Cada mascota es parte de la familia.
         </footer>
       </div>
-    </main>
+    </div>
   )
 }
 

@@ -1,6 +1,6 @@
 
 import { useCallback, useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { obtenerCitas } from '../../data/veterinaria.js'
 import './MisCitasPage.css'
 
@@ -25,7 +25,6 @@ function claseEstado(estado) {
 }
 
 function MisCitasPage() {
-  const location = useLocation()
   const [citas, setCitas] = useState(() => obtenerCitas())
   const [filtro, setFiltro] = useState('Todas')
 
@@ -33,9 +32,7 @@ function MisCitasPage() {
     setCitas(obtenerCitas())
   }, [])
 
-  useEffect(() => {
-    cargarCitas()
-  }, [location.key, cargarCitas])
+
 
   useEffect(() => {
     function actualizarAlCambiarPestana() {
@@ -78,7 +75,7 @@ function MisCitasPage() {
   ]
 
   return (
-    <main className="mis-citas-page">
+    <div className="mis-citas-page">
       <div className="mis-citas-contenido">
         <section className="mis-citas-portada">
           <div className="mis-citas-portada-texto">
@@ -134,7 +131,7 @@ function MisCitasPage() {
         </section>
 
         <section className="mis-citas-listado">
-          <header className="mis-citas-listado-header">
+          <div className="mis-citas-listado-header">
             <div>
               <span className="mis-citas-etiqueta">TU HISTORIAL</span>
               <h2>Historial de solicitudes</h2>
@@ -144,7 +141,7 @@ function MisCitasPage() {
                   : `${citasFiltradas.length} solicitudes encontradas`}
               </p>
             </div>
-          </header>
+          </div>
 
           <div className="mis-citas-filtros" aria-label="Filtrar citas">
             {filtros.map((opcion) => (
@@ -246,7 +243,7 @@ function MisCitasPage() {
           <p>Cada mascota es parte de la familia.</p>
         </footer>
       </div>
-    </main>
+    </div>
   )
 }
 

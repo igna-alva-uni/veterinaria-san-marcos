@@ -1,20 +1,11 @@
+import { claveCompra, leerCarritoUsuario } from '../data/compra.js'
+import { obtenerSesion } from '../data/veterinaria.js'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import './CarritoPage.css'
 
-const CLAVE_CARRITO = 'vsm-carrito'
-const CLAVE_PEDIDOS = 'vsm-pedidos'
-
-function obtenerCarrito() {
-  try {
-    const datos = localStorage.getItem(CLAVE_CARRITO)
-    const productos = datos ? JSON.parse(datos) : []
-    return Array.isArray(productos) ? productos : []
-  } catch {
-    return []
-  }
-}
+function obtenerCarrito() { return leerCarritoUsuario() }
 
 function formatoPrecio(precio) {
   return new Intl.NumberFormat('es-CL', {
@@ -48,7 +39,7 @@ function iconoProducto(producto) {
 
 function obtenerPedidos() {
   try {
-    const datos = JSON.parse(localStorage.getItem(CLAVE_PEDIDOS) || '[]')
+    const datos = JSON.parse(localStorage.getItem(claveCompra('vsm-pedidos')) || '[]')
     return Array.isArray(datos) ? datos : []
   } catch {
     return []
@@ -56,27 +47,27 @@ function obtenerPedidos() {
 }
 
 function CarritoPage() {
-  const [productos, setProductos] = useState(obtenerCarrito)
+  const [productos, setProductosEstado] = useState(obtenerCarrito)
   const [confirmacion, setConfirmacion] = useState(null)
   const [mensaje, setMensaje] = useState('')
   const [paso, setPaso] = useState('carrito')
   const [pedidoRealizado, setPedidoRealizado] = useState(null)
   const [datosCliente, setDatosCliente] = useState({
-    nombre: '',
-    correo: '',
-    telefono: '',
+    nombre: obtenerSesion()?.nombre || '',
+    correo: obtenerSesion()?.correo || '',
+    telefono: obtenerSesion()?.telefono || '',
     direccion: '',
     comuna: '',
     observaciones: '',
   })
 
-  useEffect(() => {
+  function setProductos(valor) {
+    const siguientes = typeof valor === 'function' ? valor(productos) : valor
     try {
-      localStorage.setItem(CLAVE_CARRITO, JSON.stringify(productos))
-    } catch {
-      setMensaje('No se pudo guardar el carrito en este navegador.')
-    }
-  }, [productos])
+      localStorage.setItem(claveCompra('vsm-carrito'), JSON.stringify(siguientes))
+      setProductosEstado(siguientes)
+    } catch { setMensaje('No se pudo guardar el carrito en este navegador.') }
+  }
 
   const cantidadTotal = useMemo(
     () => productos.reduce(
@@ -183,6 +174,7 @@ function CarritoPage() {
     const pedido = {
       numero: `VSM-${Date.now().toString().slice(-8)}`,
       fecha: new Date().toISOString(),
+      duenoId: obtenerSesion()?.id,
       cliente: { ...datosCliente },
       productos: productos.map((producto) => ({ ...producto })),
       subtotalProductos,
@@ -193,8 +185,8 @@ function CarritoPage() {
 
     try {
       const pedidos = obtenerPedidos()
-      localStorage.setItem(CLAVE_PEDIDOS, JSON.stringify([pedido, ...pedidos]))
-      localStorage.setItem(CLAVE_CARRITO, JSON.stringify([]))
+      localStorage.setItem(claveCompra('vsm-pedidos'), JSON.stringify([pedido, ...pedidos]))
+      localStorage.setItem(claveCompra('vsm-carrito'), JSON.stringify([]))
       setPedidoRealizado(pedido)
       setProductos([])
       setPaso('completado')
@@ -210,7 +202,7 @@ function CarritoPage() {
 
   if (paso === 'completado' && pedidoRealizado) {
     return (
-      <main className="carrito-pagina">
+      <div className="carrito-pagina">
         <section className="carrito-vacio">
           <div className="carrito-vacio-icono">✅</div>
           <h2>¡Pedido registrado!</h2>
@@ -231,12 +223,12 @@ function CarritoPage() {
             Volver al catálogo
           </Link>
         </section>
-      </main>
+      </div>
     )
   }
 
   return (
-    <main className="carrito-pagina">
+    <div className="carrito-pagina">
       <section className="carrito-encabezado">
         <div>
           <span className="carrito-etiqueta">SAN MARCOS · TIENDA</span>
@@ -634,7 +626,7 @@ function CarritoPage() {
           </div>
         )
       )}
-    </main>
+    </div>
   )
 }
 

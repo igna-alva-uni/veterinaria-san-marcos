@@ -6,8 +6,8 @@
 .detalle-mascota-contenedor {
   min-height: calc(100vh - 112px);
   padding: 36px 24px 48px;
-  background: #f5f9fb;
-  color: #29435e;
+  background: var(--bg);
+  color: var(--text);
   box-sizing: border-box;
 }
 
@@ -28,7 +28,7 @@
 }
 
 .detalle-mascota-contenedor h2 {
-  color: #123052;
+  color: var(--text-h);
   font-size: 1.45rem;
   font-weight: 800;
   letter-spacing: -0.025em;
@@ -40,7 +40,7 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 24px;
-  color: #087f8c;
+  color: var(--accent);
   font-size: 0.92rem;
   font-weight: 750;
   text-decoration: none;
@@ -48,7 +48,7 @@
 }
 
 .detalle-mascota-volver:hover {
-  color: #07566b;
+  color: var(--accent-hover);
   text-decoration: underline;
 }
 
@@ -64,7 +64,7 @@
   padding: 34px;
   border: 1px solid #dceff2;
   border-radius: 24px;
-  background: linear-gradient(120deg, #e0f5f6, #f7fcfd 75%);
+  background: linear-gradient(120deg, var(--hero-start), var(--hero-end) 75%);
   box-shadow: 0 8px 24px rgb(18 48 82 / 5%);
 }
 
@@ -88,7 +88,7 @@
 .detalle-mascota-etiqueta {
   display: inline-block;
   margin-bottom: 8px;
-  color: #087f8c;
+  color: var(--accent);
   font-size: 0.76rem;
   font-weight: 850;
   letter-spacing: 0.09em;
@@ -97,7 +97,7 @@
 
 .detalle-mascota-presentacion h1 {
   margin: 0 0 8px;
-  color: #123052;
+  color: var(--text-h);
   font-size: clamp(2rem, 4vw, 2.8rem);
   font-weight: 900;
   letter-spacing: -0.045em;
@@ -106,7 +106,7 @@
 
 .detalle-mascota-presentacion p {
   margin: 0;
-  color: #718397;
+  color: var(--text-muted);
   font-size: 1rem;
   line-height: 1.6;
 }
@@ -116,7 +116,7 @@
 .detalle-mascota-tarjeta {
   margin-bottom: 24px;
   padding: clamp(22px, 4vw, 34px);
-  border: 1px solid #e1ebef;
+  border: 1px solid var(--border);
   border-radius: 22px;
   background: #fff;
   box-shadow: 0 7px 25px rgb(18 48 82 / 5%);
@@ -138,14 +138,14 @@
 .detalle-mascota-encabezado h2,
 .detalle-mascota-tarjeta > h2 {
   margin: 0 0 8px;
-  color: #123052;
+  color: var(--text-h);
   font-size: 1.45rem;
   font-weight: 850;
 }
 
 .detalle-mascota-tarjeta > p {
   margin: 0 0 20px;
-  color: #718397;
+  color: var(--text-muted);
   line-height: 1.7;
 }
 
@@ -170,13 +170,13 @@
 }
 
 .detalle-mascota-datos article span {
-  color: #8292a1;
+  color: var(--text-muted);
   font-size: 0.8rem;
   font-weight: 650;
 }
 
 .detalle-mascota-datos article strong {
-  color: #29435e;
+  color: var(--text);
   font-size: 1rem;
   font-weight: 800;
   overflow-wrap: anywhere;
@@ -216,14 +216,14 @@
 
 .detalle-mascota-boton:hover {
   transform: translateY(-1px);
-  background: linear-gradient(135deg, #087f8c, #07566b);
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
   box-shadow: 0 8px 16px rgb(8 127 140 / 20%);
 }
 
 .detalle-mascota-boton-secundario {
   border-color: #cce8ec;
   background: #f0fafb;
-  color: #087f8c;
+  color: var(--accent);
 }
 
 .detalle-mascota-boton-secundario:hover {
@@ -256,7 +256,7 @@
   min-width: 0;
   flex-direction: column;
   gap: 8px;
-  color: #29435e;
+  color: var(--text);
   font-size: 0.9rem;
   font-weight: 700;
 }
@@ -269,7 +269,7 @@
   border: 1px solid #d4e0e5;
   border-radius: 11px;
   background: #fff;
-  color: #29435e;
+  color: var(--text);
   font-family: inherit;
   font-size: 0.95rem;
   box-sizing: border-box;
@@ -342,7 +342,7 @@
 .detalle-mascota-zona-peligro p {
   max-width: 600px;
   margin: 0;
-  color: #718397;
+  color: var(--text-muted);
   font-size: 0.9rem;
   line-height: 1.7;
 }
@@ -373,7 +373,7 @@
 
 .detalle-mascota-nota {
   margin-top: 22px;
-  color: #8292a1;
+  color: var(--text-muted);
   font-size: 0.84rem;
   line-height: 1.7;
   text-align: center;
@@ -383,7 +383,7 @@
 
 .detalle-mascota-no-encontrada {
   padding: 50px 28px;
-  border: 1px solid #e1ebef;
+  border: 1px solid var(--border);
   border-radius: 22px;
   background: #fff;
   box-shadow: 0 7px 25px rgb(18 48 82 / 5%);
@@ -392,12 +392,12 @@
 
 .detalle-mascota-no-encontrada h1 {
   margin: 0 0 12px;
-  color: #123052;
+  color: var(--text-h);
 }
 
 .detalle-mascota-no-encontrada p {
   margin: 0 0 24px;
-  color: #718397;
+  color: var(--text-muted);
   line-height: 1.7;
 }
 

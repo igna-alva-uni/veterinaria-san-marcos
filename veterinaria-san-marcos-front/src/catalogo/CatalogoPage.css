@@ -5,8 +5,8 @@
 
 .catalogo-page {
   min-height: calc(100vh - 100px);
-  background: #f5f9fb;
-  color: #29435e;
+  background: var(--bg);
+  color: var(--text);
   padding-bottom: 48px;
 }
 
@@ -24,7 +24,7 @@
   position: relative;
   overflow: hidden;
   padding: 56px max(24px, calc((100% - 1160px) / 2));
-  background: linear-gradient(120deg, #e0f5f6 0%, #f2fbfc 58%, #e7f5f7 100%);
+  background: linear-gradient(120deg, var(--hero-start) 0%, #f2fbfc 58%, #e7f5f7 100%);
   border-bottom: 1px solid #d8edf0;
 }
 
@@ -49,7 +49,7 @@
 .catalogo-etiqueta {
   display: inline-block;
   margin-bottom: 12px;
-  color: #087f8c;
+  color: var(--accent);
   font-size: 0.76rem;
   font-weight: 850;
   letter-spacing: 0.12em;
@@ -57,7 +57,7 @@
 
 .catalogo-hero h1 {
   margin: 0 0 16px;
-  color: #123052;
+  color: var(--text-h);
   font-size: clamp(2.2rem, 4.5vw, 3.5rem);
   font-weight: 900;
   letter-spacing: -0.05em;
@@ -155,7 +155,7 @@
 
 .catalogo-titulo-seccion h2 {
   margin: 0 0 9px;
-  color: #123052;
+  color: var(--text-h);
   font-size: clamp(1.6rem, 3vw, 2.1rem);
   font-weight: 900;
   letter-spacing: -0.035em;
@@ -163,7 +163,7 @@
 
 .catalogo-titulo-seccion p {
   margin: 0;
-  color: #718397;
+  color: var(--text-muted);
   line-height: 1.6;
 }
 
@@ -181,7 +181,7 @@
 }
 
 .catalogo-contador strong {
-  color: #087f8c;
+  color: var(--accent);
   font-size: 1.35rem;
   font-weight: 900;
 }
@@ -195,7 +195,7 @@
   gap: 14px;
   margin-bottom: 28px;
   padding: 20px;
-  border: 1px solid #e1ebef;
+  border: 1px solid var(--border);
   border-radius: 18px;
   background: #fff;
   box-shadow: 0 5px 20px rgb(18 48 82 / 4%);
@@ -211,7 +211,7 @@
   border: 1px solid #dce7eb;
   border-radius: 11px;
   background: #fbfdfe;
-  color: #087f8c;
+  color: var(--accent);
   font-size: 1.6rem;
 }
 
@@ -228,7 +228,7 @@
   border: none;
   outline: none;
   background: transparent;
-  color: #29435e;
+  color: var(--text);
   font: inherit;
   font-size: 0.9rem;
 }
@@ -258,7 +258,7 @@
   border-radius: 11px;
   outline: none;
   background: #fbfdfe;
-  color: #29435e;
+  color: var(--text);
   font: inherit;
   font-size: 0.88rem;
   cursor: pointer;
@@ -275,7 +275,7 @@
   border: 1px solid #cce8ec;
   border-radius: 11px;
   background: #f0fafb;
-  color: #087f8c;
+  color: var(--accent);
   font: inherit;
   font-size: 0.88rem;
   font-weight: 800;
@@ -407,7 +407,7 @@
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: #718397;
+  color: var(--text-muted);
   font-size: 1.4rem;
   cursor: pointer;
 }
@@ -453,7 +453,7 @@
   min-width: 0;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid #e1ebef;
+  border: 1px solid var(--border);
   border-radius: 20px;
   background: #fff;
   box-shadow: 0 5px 20px rgb(18 48 82 / 4%);
@@ -510,7 +510,7 @@
   border: 1px solid rgb(255 255 255 / 80%);
   border-radius: 9px;
   background: rgb(255 255 255 / 82%);
-  color: #087f8c;
+  color: var(--accent);
   font-size: 0.73rem;
   font-weight: 800;
   text-overflow: ellipsis;
@@ -535,7 +535,7 @@
   position: absolute;
   right: 13px;
   bottom: 13px;
-  color: #718397;
+  color: var(--text-muted);
   font-size: 0.75rem;
   font-weight: 800;
 }
@@ -568,12 +568,12 @@
 .catalogo-producto-info:has(.catalogo-observaciones) .catalogo-tipo-etiqueta {
   border-color: #cce8ec;
   background: #effafa;
-  color: #087f8c;
+  color: var(--accent);
 }
 
 .catalogo-producto-info h3 {
   margin: 0 0 6px;
-  color: #123052;
+  color: var(--text-h);
   font-size: 1.12rem;
   font-weight: 850;
   line-height: 1.4;
@@ -583,7 +583,7 @@
 .catalogo-producto-principio {
   min-height: 24px;
   margin: 0 0 18px;
-  color: #8292a1;
+  color: var(--text-muted);
   font-size: 0.84rem;
   line-height: 1.5;
   overflow-wrap: anywhere;
@@ -602,7 +602,7 @@
 }
 
 .catalogo-producto-detalles span {
-  color: #8292a1;
+  color: var(--text-muted);
   font-size: 0.75rem;
   font-weight: 650;
 }
@@ -663,12 +663,12 @@
 }
 
 .catalogo-producto-precio > span {
-  color: #8292a1;
+  color: var(--text-muted);
   font-size: 0.75rem;
 }
 
 .catalogo-producto-precio strong {
-  color: #087f8c;
+  color: var(--accent);
   font-size: 1.3rem;
   font-weight: 900;
   letter-spacing: -0.025em;
@@ -717,7 +717,7 @@
 
 .catalogo-agregar:hover:not(:disabled) {
   transform: translateY(-1px);
-  background: linear-gradient(135deg, #087f8c, #07566b);
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
   box-shadow: 0 8px 16px rgb(8 127 140 / 19%);
 }
 
@@ -753,14 +753,14 @@
 
 .catalogo-vacio h3 {
   margin: 0 0 9px;
-  color: #123052;
+  color: var(--text-h);
   font-size: 1.35rem;
 }
 
 .catalogo-vacio p {
   max-width: 420px;
   margin: 0;
-  color: #718397;
+  color: var(--text-muted);
   line-height: 1.7;
 }
 

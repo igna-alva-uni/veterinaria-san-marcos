@@ -1,4 +1,4 @@
-﻿
+
 .citas-page {
   width: 100%;
   min-height: calc(100vh - 112px);
@@ -7,7 +7,7 @@
   background:
     radial-gradient(ellipse at 8% 0%, rgba(22, 166, 174, 0.07), transparent 35%),
     #f4f9fa;
-  color: #123052;
+  color: var(--text-h);
 }
 
 .citas-contenido {
@@ -21,14 +21,14 @@
   align-items: center;
   gap: 9px;
   margin-bottom: 24px;
-  color: #087f8c;
+  color: var(--accent);
   font-size: 0.92rem;
   font-weight: 750;
   text-decoration: none;
 }
 
 .citas-volver:hover {
-  color: #07566b;
+  color: var(--accent-hover);
   text-decoration: underline;
 }
 
@@ -68,7 +68,7 @@
 .citas-marca {
   display: inline-block;
   margin: 0 0 10px;
-  color: #087f8c;
+  color: var(--accent);
   font-size: 0.73rem;
   font-weight: 850;
   letter-spacing: 0.12em;
@@ -76,7 +76,7 @@
 
 .citas-titulo {
   margin: 0 0 12px;
-  color: #123052;
+  color: var(--text-h);
   font-size: clamp(2rem, 3.5vw, 3rem);
   font-weight: 850;
   letter-spacing: -0.045em;
@@ -166,7 +166,7 @@
 .citas-paso {
   display: inline-block;
   margin-bottom: 9px;
-  color: #087f8c;
+  color: var(--accent);
   font-size: 0.72rem;
   font-weight: 850;
   letter-spacing: 0.12em;
@@ -174,7 +174,7 @@
 
 .citas-panel-encabezado h2 {
   margin: 0 0 8px;
-  color: #123052;
+  color: var(--text-h);
   font-size: clamp(1.45rem, 2.3vw, 1.9rem);
   font-weight: 850;
   letter-spacing: -0.025em;
@@ -212,7 +212,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  color: #29435e;
+  color: var(--text);
   font-size: 0.9rem;
   font-weight: 750;
   text-align: left;
@@ -240,7 +240,7 @@
   border-radius: 12px;
   outline: none;
   background: #fbfdfe;
-  color: #123052;
+  color: var(--text-h);
   font: inherit;
   font-size: 0.94rem;
   transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
@@ -308,7 +308,7 @@
   justify-content: center;
   gap: 10px;
   padding: 13px 20px;
-  border: 1px solid #087f8c;
+  border: 1px solid var(--accent);
   border-radius: 13px;
   background: linear-gradient(135deg, #0c94a0, #087080);
   box-shadow: 0 6px 15px rgba(8, 127, 140, 0.18);
@@ -324,7 +324,7 @@
 
 .citas-boton:hover:not(:disabled) {
   transform: translateY(-2px);
-  background: linear-gradient(135deg, #087f8c, #07566b);
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
   box-shadow: 0 9px 20px rgba(8, 127, 140, 0.23);
 }
 
@@ -390,7 +390,7 @@
 
 .citas-sin-mascotas h3 {
   margin: 18px 0 8px;
-  color: #123052;
+  color: var(--text-h);
 }
 
 .citas-sin-mascotas p {
@@ -433,7 +433,7 @@
 
 .citas-lateral-tarjeta h3 {
   margin: 0 0 10px;
-  color: #123052;
+  color: var(--text-h);
   font-size: 1.13rem;
   font-weight: 850;
 }
@@ -461,7 +461,7 @@
   border: 1px solid #dceff2;
   border-radius: 9px;
   background: #fff;
-  color: #087f8c;
+  color: var(--accent);
   font-size: 0.83rem;
   font-weight: 750;
   text-align: center;
@@ -482,7 +482,7 @@
 }
 
 .citas-lateral-ayuda > span {
-  color: #087f8c;
+  color: var(--accent);
   font-size: 1.2rem;
   font-weight: 850;
 }
@@ -495,7 +495,7 @@
 }
 
 .citas-lateral-ayuda a {
-  color: #087f8c;
+  color: var(--accent);
   font-size: 0.87rem;
   font-weight: 800;
   text-decoration: none;

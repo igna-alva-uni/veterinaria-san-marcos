@@ -167,7 +167,7 @@ function RecepcionSolicitudesPage() {
   ]
 
   return (
-    <main className="recepcion-solicitudes-page">
+    <div className="recepcion-solicitudes-page">
       <div className="recepcion-solicitudes-contenido">
         <section className="recepcion-solicitudes-portada">
           <div className="recepcion-solicitudes-portada-texto">
@@ -262,7 +262,7 @@ function RecepcionSolicitudesPage() {
         </section>
 
         <section className="recepcion-solicitudes-panel">
-          <header className="recepcion-solicitudes-panel-encabezado">
+          <div className="recepcion-solicitudes-panel-encabezado">
             <div>
               <span className="recepcion-solicitudes-etiqueta">
                 ADMINISTRACIÓN
@@ -277,7 +277,7 @@ function RecepcionSolicitudesPage() {
               {citasFiltradas.length}{' '}
               {citasFiltradas.length === 1 ? 'solicitud' : 'solicitudes'}
             </span>
-          </header>
+          </div>
 
           <div className="recepcion-solicitudes-filtros" aria-label="Filtrar solicitudes">
             {filtros.map((opcion) => (
@@ -317,7 +317,7 @@ function RecepcionSolicitudesPage() {
               {citasFiltradas.map((cita) => (
                 <article className="recepcion-solicitud-card" key={cita.id}>
                   <div className="recepcion-solicitud-datos">
-                    <header className="recepcion-solicitud-titulo">
+                    <div className="recepcion-solicitud-titulo">
                       <div className="recepcion-solicitud-identidad">
                         <span className="recepcion-solicitud-avatar" aria-hidden="true">
                           🐾
@@ -339,7 +339,7 @@ function RecepcionSolicitudesPage() {
                         <span aria-hidden="true">●</span>
                         {cita.estado || 'Pendiente de confirmación'}
                       </span>
-                    </header>
+                    </div>
 
                     <div className="recepcion-solicitud-meta">
                       <div>
@@ -482,7 +482,7 @@ function RecepcionSolicitudesPage() {
           <p>Una agenda organizada nos ayuda a cuidar mejor de cada mascota.</p>
         </footer>
       </div>
-    </main>
+    </div>
   )
 }
 

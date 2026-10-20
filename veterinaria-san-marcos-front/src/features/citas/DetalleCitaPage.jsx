@@ -27,7 +27,7 @@ function DetalleCitaPage() {
 
   if (!cita) {
     return (
-      <main className="detalle-cita-page">
+      <div className="detalle-cita-page">
         <div className="detalle-cita-contenido">
           <section className="detalle-cita-no-encontrada">
             <span className="detalle-cita-no-encontrada-icono" aria-hidden="true">
@@ -46,7 +46,7 @@ function DetalleCitaPage() {
             </Link>
           </section>
         </div>
-      </main>
+      </div>
     )
   }
 
@@ -73,7 +73,7 @@ function DetalleCitaPage() {
           : 'Consulta el estado actualizado de tu solicitud en Mis citas.'
 
   return (
-    <main className="detalle-cita-page">
+    <div className="detalle-cita-page">
       <div className="detalle-cita-contenido">
         <Link to="/mis-citas" className="detalle-cita-volver">
           <span aria-hidden="true">←</span> Volver a mis citas
@@ -97,7 +97,7 @@ function DetalleCitaPage() {
         </section>
 
         <section className="detalle-cita-tarjeta">
-          <header className="detalle-cita-resumen">
+          <div className="detalle-cita-resumen">
             <span className="detalle-cita-icono" aria-hidden="true">
               ✚
             </span>
@@ -114,7 +114,7 @@ function DetalleCitaPage() {
               <span aria-hidden="true">●</span>
               {estado}
             </span>
-          </header>
+          </div>
 
           <div className="detalle-cita-separador" />
 
@@ -209,7 +209,7 @@ function DetalleCitaPage() {
           Cada mascota es parte de la familia.
         </footer>
       </div>
-    </main>
+    </div>
   )
 }
 

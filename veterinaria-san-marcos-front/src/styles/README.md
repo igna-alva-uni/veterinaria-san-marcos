@@ -43,3 +43,31 @@ funcionen el enlace de salto, el ancho compartido y el pie al final de la pantal
 
 Los estilos del módulo integrado se limitan a `.vet-module` en App.css. Las
 rejillas y tablas usan utilidades Tailwind; no se importa Bootstrap.
+
+## Integración de mascotas, citas y compras
+
+Las rutas `/mascotas`, `/mascotas/:id` y `/citas/nueva` son para dueños.
+`/mis-citas` y su detalle requieren sesión; los dueños solo ven sus solicitudes.
+Recepción y administración gestionan todas en `/recepcion/solicitudes`.
+`/catalogo` y `/carrito` requieren sesión. Todas usan el Header y Footer comunes;
+el Navbar alternativo de la rama no se monta.
+
+`data/veterinaria.js` utiliza `vet_pacientes`, la misma fuente que recepción.
+Al registrar o editar desde las páginas de mascotas, emite `vet:pacientes` para
+sincronizar el estado de App. Conserva el historial clínico y el identificador del
+propietario. Las citas se guardan en `vsm-citas` con su `duenoId` y se filtran al leer.
+
+Los registros heredados de demostración sin propietario se reservan al cliente
+semilla de id 3; no se asignan al usuario que abra la aplicación. La migración de
+`vsm-mascotas` conserva los pacientes existentes y agrega los identificadores
+faltantes una sola vez.
+
+`data/catalogo.js` es el catálogo compartido. `catalogo.js` conserva exportaciones
+compatibles para la ficha clínica. El carrito y los pedidos usan claves por cuenta:
+`vsm-carrito:<id>` y `vsm-pedidos:<id>`. Los datos de compra heredados se reservan
+al cliente semilla. Un servicio tiene una unidad; los productos respetan el stock
+referencial. El pedido es una demostración local, sin pagos ni despacho real.
+
+Las páginas nuevas usan `.feature-module` para conservar su CSS propio sin recibir
+los estilos de formularios de `.vet-module`. Sus elementos raíz son contenedores,
+para mantener un solo `main` en el documento.

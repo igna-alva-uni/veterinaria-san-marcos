@@ -14,7 +14,7 @@ import {
   useNavigate,
   useLocation
 } from "react-router-dom";
-import { usuariosIniciales, pacientesIniciales } from "./datos";
+import { usuariosIniciales } from "./datos";
 import {
   correoValido,
   correoValidoParaRol,
@@ -28,6 +28,15 @@ import Header from './Header.jsx';
 import Footer from './Footer.jsx';
 import { mainNavigation } from './navigation.js';
 import { servicios } from './catalogo.js';
+import MascotasPage from './features/mascotas/MascotasPage.jsx';
+import DetalleMascotaPage from './features/mascotas/DetalleMascotaPage.jsx';
+import SolicitarCitaPage from './features/citas/SolicitarCitaPage.jsx';
+import MisCitasPage from './features/citas/MisCitasPage.jsx';
+import DetalleCitaPage from './features/citas/DetalleCitaPage.jsx';
+import RecepcionSolicitudesPage from './features/citas/RecepcionSolicitudesPage.jsx';
+import CatalogoPage from './catalogo/CatalogoPage.jsx';
+import CarritoPage from './catalogo/CarritoPage.jsx';
+import { EVENTO_PACIENTES, leerPacientesCompartidos } from './data/veterinaria.js';
 const leer = (clave, defecto) => {
   try {
     return JSON.parse(localStorage.getItem(clave)) ?? defecto;
@@ -40,24 +49,29 @@ function AppInterna() {
     leer("vet_usuarios", usuariosIniciales),
   );
   const [pacientes, setPacientes] = useState(() =>
-    leer("vet_pacientes", pacientesIniciales),
+    leerPacientesCompartidos(),
   );
   const [sesionGuardada, setSesion] = useState(() => leer("vet_sesion", null));
   const sesion = usuarios.find((usuario) => usuario.id === sesionGuardada?.id && usuario.activo) || null;
   const [mensaje, setMensaje] = useState("");
   const navegar = useNavigate();
   const { pathname } = useLocation();
+  const esModuloNuevo = /^\/(mascotas|citas|mis-citas|catalogo|carrito)(\/|$)/.test(pathname) || pathname === '/recepcion/solicitudes';
   const esAutenticacion = pathname === '/login' || pathname === '/registro';
   const roles = ['Administrador', 'Recepcionista', 'Dueño'];
   const enlaces = [
     ...mainNavigation,
-    ...(sesion ? [{ label: 'Mi perfil', href: '/perfil' }] : []),
+    ...(sesion ? [{ label: 'Mi perfil', href: '/perfil' }, { label: 'Catálogo', href: '/catalogo' }, { label: 'Carrito', href: '/carrito' }] : []),
+    ...(sesion?.rol === 'Dueño' ? [
+      { label: 'Mis mascotas', href: '/mascotas' }, { label: 'Solicitar cita', href: '/citas/nueva' }, { label: 'Mis citas', href: '/mis-citas' },
+    ] : []),
     ...(sesion?.rol === 'Administrador' ? [
       { label: 'Usuarios', href: '/admin/usuarios' },
       { label: 'Reportes', href: '/admin/reportes' },
     ] : []),
     ...(['Administrador', 'Recepcionista'].includes(sesion?.rol) ? [
       { label: 'Pacientes', href: '/recepcion/pacientes' },
+      { label: 'Solicitudes', href: '/recepcion/solicitudes' },
     ] : []),
   ];
   useEffect(
@@ -72,6 +86,11 @@ function AppInterna() {
     () => localStorage.setItem("vet_sesion", JSON.stringify(sesion)),
     [sesion],
   );
+  useEffect(() => {
+    const sincronizar = () => setPacientes(leerPacientesCompartidos());
+    window.addEventListener(EVENTO_PACIENTES, sincronizar);
+    return () => window.removeEventListener(EVENTO_PACIENTES, sincronizar);
+  }, []);
   const ir = (ruta) => {
     setMensaje("");
     navegar(ruta);
@@ -148,13 +167,21 @@ function AppInterna() {
         user={sesion ? { name: sesion.nombre } : null}
         onLogout={cerrarSesion} onLogin={() => ir('/login')} />}
       <main id="contenido" className={`site-container site-main ${esAutenticacion ? 'auth-module' : ''}`} tabIndex={-1}>
-      <div className="vet-module">
+      <div className={esModuloNuevo ? "feature-module" : "vet-module"}>
       {mensaje && (
         <div role="alert" className="alerta">
           {mensaje}
         </div>
       )}
       <Routes>
+        <Route path="/mascotas" element={acceso(['Dueño'], <MascotasPage />)} />
+        <Route path="/mascotas/:id" element={acceso(['Dueño'], <DetalleMascotaPage key={pathname} />)} />
+        <Route path="/citas/nueva" element={acceso(['Dueño'], <SolicitarCitaPage />)} />
+        <Route path="/mis-citas" element={acceso(roles, <MisCitasPage />)} />
+        <Route path="/mis-citas/:id" element={acceso(roles, <DetalleCitaPage key={pathname} />)} />
+        <Route path="/recepcion/solicitudes" element={acceso(['Administrador', 'Recepcionista'], <RecepcionSolicitudesPage />)} />
+        <Route path="/catalogo" element={acceso(roles, <CatalogoPage key={sesion?.id} />)} />
+        <Route path="/carrito" element={acceso(roles, <CarritoPage key={sesion?.id} />)} />
         <Route path="/inicio" element={acceso(roles,
           <section className="tarjeta">
             <h1>Bienvenido a Veterinaria San Marcos</h1>
@@ -264,7 +291,7 @@ function AppInterna() {
                     .filter((x) => x.duenoId === sesion.id)
                     .map((x) => (
                       <p key={x.id}>
-                        {x.nombre} · {x.especie} · {x.historial.length}{" "}
+                        {x.nombre} · {x.especie} · {(x.historial || []).length}{" "}
                         atenciones registradas
                       </p>
                     ))}
