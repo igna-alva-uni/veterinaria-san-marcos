@@ -67,12 +67,12 @@ export default function Usuarios({
           ↔ Desliza la tabla hacia los lados para ver más columnas.
         </p>
         <div
-          className="tabla table-responsive"
+          className="tabla overflow-x-auto"
           role="region"
           aria-label="Tabla con desplazamiento horizontal"
           tabIndex={0}
         >
-          <table className="table table-hover">
+          <table className="w-full border-collapse text-left [&_tbody_tr:hover]:bg-[var(--surface-soft)]">
             <thead>
               <tr>
                 <th>Nombre</th>
@@ -93,6 +93,7 @@ export default function Usuarios({
                   <tr key={u.id}>
                     <td>
                       <NombreUsuarioEditable
+                        key={`${u.id}-${u.nombre}`}
                         usuario={u}
                         avisar={setMensaje}
                         guardar={(id, nombre) =>

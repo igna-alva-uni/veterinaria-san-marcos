@@ -1,12 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { textoRequerido } from "../validaciones";
 
 export default function NombreUsuarioEditable({ usuario, guardar, avisar }) {
   const [nombre, setNombre] = useState(usuario.nombre);
-
-  useEffect(() => {
-    setNombre(usuario.nombre);
-  }, [usuario.nombre]);
 
   const confirmar = () => {
     if (!textoRequerido(nombre)) {

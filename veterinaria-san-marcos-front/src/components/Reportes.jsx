@@ -28,7 +28,7 @@ export default function Reportes({ pacientes, usuarios }) {
           <span>Atenciones del período</span>
         </div>
       </div>
-      <div className="rejilla row g-3">
+      <div className="grid grid-cols-1 gap-x-5 gap-y-3 md:grid-cols-2">
         <label>
           Desde
           <input
@@ -55,12 +55,12 @@ export default function Reportes({ pacientes, usuarios }) {
           ↔ Desliza la tabla hacia los lados para ver más columnas.
         </p>
         <div
-          className="tabla table-responsive"
+          className="tabla overflow-x-auto"
           role="region"
           aria-label="Tabla con desplazamiento horizontal"
           tabIndex={0}
         >
-          <table className="table table-hover">
+          <table className="w-full border-collapse text-left [&_tbody_tr:hover]:bg-[var(--surface-soft)]">
             <thead>
               <tr>
                 <th>Fecha</th>

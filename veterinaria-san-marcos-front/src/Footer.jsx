@@ -1,4 +1,5 @@
 import Brand from './Brand.jsx'
+import { Link } from 'react-router-dom'
 import { mainNavigation } from './navigation.js'
 
 function Footer({ navigation = mainNavigation, contact = {} }) {
@@ -14,7 +15,7 @@ function Footer({ navigation = mainNavigation, contact = {} }) {
         <nav className="site-footer__section" aria-label="Enlaces del pie de página">
           <h2>Explora</h2>
           <ul>
-            {navigation.map(({ label, href }) => <li key={href}><a href={href}>{label}</a></li>)}
+            {navigation.map(({ label, href }) => <li key={href}><Link to={href}>{label}</Link></li>)}
           </ul>
         </nav>
         <div className="site-footer__section">
@@ -25,7 +26,7 @@ function Footer({ navigation = mainNavigation, contact = {} }) {
             {email && <a href={`mailto:${email}`}>{email}</a>}
           </address>
           {hours && <p className="site-footer__hours">{hours}</p>}
-          <a className="site-footer__location" href="/ubicacion">Ver ubicación <span aria-hidden="true">↗</span></a>
+          <Link className="site-footer__location" to="/ubicacion">Ver ubicación <span aria-hidden="true">↗</span></Link>
         </div>
       </div>
       <div className="site-container site-footer__bottom">

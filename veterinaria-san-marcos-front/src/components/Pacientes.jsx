@@ -20,7 +20,7 @@ export default function Pacientes({ pacientes, setPacientes, usuarios, ir }) {
       <p>Registro y edición de mascotas.</p>
       {error && <p role="alert">{error}</p>}
       <form
-        className="rejilla row g-3"
+        className="grid grid-cols-1 gap-x-5 gap-y-3 md:grid-cols-2"
         onSubmit={(e) => {
           e.preventDefault();
           const fallo = validarPaciente(f);
@@ -115,12 +115,12 @@ export default function Pacientes({ pacientes, setPacientes, usuarios, ir }) {
           ↔ Desliza la tabla hacia los lados para ver más columnas.
         </p>
         <div
-          className="tabla table-responsive"
+          className="tabla overflow-x-auto"
           role="region"
           aria-label="Tabla con desplazamiento horizontal"
           tabIndex={0}
         >
-          <table className="table table-hover">
+          <table className="w-full border-collapse text-left [&_tbody_tr:hover]:bg-[var(--surface-soft)]">
             <thead>
               <tr>
                 <th>Nombre</th>
@@ -146,7 +146,7 @@ export default function Pacientes({ pacientes, setPacientes, usuarios, ir }) {
                 )
                 .map((x) => (
                   <tr key={x.id}>
-                    <PacienteEditable paciente={x} guardar={guardarEdicion} />
+                    <PacienteEditable key={`${x.id}-${x.nombre}-${x.especie}-${x.edad}`} paciente={x} guardar={guardarEdicion} />
                     <td>
                       {usuarios.find((u) => u.id === x.duenoId)?.nombre ||
                         "Sin dueño"}

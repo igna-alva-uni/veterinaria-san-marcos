@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import Brand from './Brand.jsx'
 import { mainNavigation } from './navigation.js'
 
@@ -54,7 +55,7 @@ function Header({
           <ul className="site-nav__list">
             {navigation.map(({ label, href }) => (
               <li key={href}>
-                <a href={href} aria-current={isActive(href) ? 'page' : undefined} onClick={() => setMenuOpen(false)}>{label}</a>
+                <Link to={href} aria-current={isActive(href) ? 'page' : undefined} onClick={() => setMenuOpen(false)}>{label}</Link>
               </li>
             ))}
           </ul>

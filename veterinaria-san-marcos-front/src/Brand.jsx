@@ -1,6 +1,8 @@
+import { Link } from 'react-router-dom'
+
 function Brand({ compact = false }) {
   return (
-    <a className="site-brand" href="/inicio" aria-label="Veterinaria San Marcos, inicio">
+    <Link className="site-brand" to="/inicio" aria-label="Veterinaria San Marcos, inicio">
       <span className="site-brand__mark" aria-hidden="true">
         <svg viewBox="0 0 40 40" fill="currentColor">
           <ellipse cx="12" cy="12" rx="4" ry="5" transform="rotate(-25 12 12)" />
@@ -15,7 +17,7 @@ function Brand({ compact = false }) {
         <span className="site-brand__name">San Marcos</span>
         {!compact && <span className="site-brand__tagline">Cuidamos a quienes más quieres</span>}
       </span>
-    </a>
+    </Link>
   )
 }
 

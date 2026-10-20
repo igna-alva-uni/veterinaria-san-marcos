@@ -1,285 +1,34 @@
-* {
-  box-sizing: border-box;
-}
-body {
-  margin: 0;
-  background: #f4f8f7;
-  color: #20352e;
-  font-family: system-ui, Arial, sans-serif;
-}
-.marca {
-  font-size: 1.35rem;
-  font-weight: 750;
-}
-.marca small {
-  display: block;
-  font-size: 0.76rem;
-  font-weight: 400;
-}
-nav {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 14px;
-}
-nav a {
-  color: white;
-}
-a {
-  color: #136d5b;
-}
-main {
-  max-width: 1200px;
-  margin: auto;
-  padding: 20px;
-}
-.encabezado {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
-  color: #52665e;
-}
-.tarjeta {
-  background: white;
-  border: 1px solid #dce7e1;
-  border-radius: 12px;
-  padding: 22px;
-  margin-bottom: 18px;
-  box-shadow: 0 3px 15px #1746320b;
-}
-.formulario {
-  max-width: 600px;
-}
-h1 {
-  font-size: 1.75rem;
-  margin-top: 0;
-}
-h2 {
-  font-size: 1.2rem;
-}
-label {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-weight: 600;
-  margin: 10px 0;
-}
-input,
-select,
-textarea {
-  font: inherit;
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #aabeb3;
-  border-radius: 7px;
-  background: white;
-  color: #233e32;
-}
-textarea {
-  min-height: 90px;
-}
-button {
-  background: #136d5b;
-  border: 0;
-  border-radius: 7px;
-  color: white;
-  padding: 10px 16px;
-  cursor: pointer;
-  font: inherit;
-  margin: 5px 5px 5px 0;
-}
-button:hover {
-  background: #0d4b3e;
-}
-.rejilla {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px 20px;
-}
-.rejilla button {
-  align-self: end;
-}
-.tabla-contenedor {
-  width: 100%;
-  min-width: 0;
-  margin-top: 16px;
-}
-.tabla {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-}
-.tabla:focus-visible {
-  outline: 2px solid #136d5b;
-  outline-offset: 2px;
-}
-.aviso-deslizamiento {
-  display: none;
-  font-size: 0.85rem;
-  color: #52665e;
-  margin: 0 0 8px;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 650px;
-}
-th,
-td {
-  text-align: left;
-  padding: 10px;
-  border-bottom: 1px solid #e0e8e3;
-}
-th {
-  background: #e9f4ef;
-}
-.alerta {
-  background: #fff3d5;
-  border: 1px solid #e9c878;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 12px;
-}
-.historial {
-  padding: 15px;
-  border-left: 4px solid #14866a;
-  background: #f4faf7;
-  margin: 12px 0;
-}
-.metricas {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-.metricas > div {
-  background: #e8f5ed;
-  border-radius: 10px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-}
-.metricas strong {
-  font-size: 2rem;
-}
-@media (max-width: 767px) {
-  main {
-    padding: 12px;
-  }
-  .tarjeta {
-    padding: 15px;
-  }
-  .rejilla,
-  .metricas {
-    grid-template-columns: 1fr;
-  }
-  nav {
-    width: 100%;
-  }
-  h1 {
-    font-size: 1.45rem;
-  }
-  .aviso-deslizamiento {
-    display: block;
-  }
-  .tabla table {
-    min-width: 780px;
-  }
-  .tabla input {
-    min-width: 130px;
-  }
-  .tabla select {
-    min-width: 115px;
-  }
-  .tabla button {
-    white-space: nowrap;
-  }
-}
-.barra-sesion {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.barra-sesion button {
-  background-color: #126b59;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 10px 16px;
-  cursor: pointer;
-  margin: 0;
-}
-
-@media (max-width: 480px) {
-  .barra-sesion {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-}
-
-.boton-eliminar {
-  background-color: #b3261e;
-  color: white;
-  border: none;
-  border-radius: 7px;
-  padding: 10px 16px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.boton-eliminar:hover {
-  background-color: #8c1d18;
-}
-
-.boton-eliminar:disabled {
-  background-color: #b5b5b5;
-  cursor: not-allowed;
-}
-
-.tabla td button {
-  margin: 5px 8px 5px 0;
-}
-
-@media (min-width: 481px) and (max-width: 1023px) {
-  .tabla td button {
-    padding: 9px 12px;
-    font-size: 0.9rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .tabla td button {
-    padding: 8px 12px;
-    font-size: 0.85rem;
-    white-space: nowrap;
-  }
-
-  .boton-eliminar {
-    white-space: nowrap;
-  }
-}
-
-.rejilla.row {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0;
-}
-
-.rejilla.row > label {
-  width: 100%;
-  margin: 0;
-}
-
-@media (min-width: 768px) {
-  .rejilla.row > label {
-    width: calc(50% - 10px);
-  }
-}
+/* Estilos del módulo integrado. Tailwind se importa una sola vez en index.css. */
+.vet-module { color: var(--text); }
+.auth-module { display: grid; align-content: center; padding-block: 48px; }
+.vet-module .tarjeta { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: clamp(18px, 3vw, 30px); margin-bottom: 20px; box-shadow: var(--shadow); min-width: 0; }
+.vet-module .formulario { width: 100%; max-width: 600px; margin-inline: auto; }
+.vet-module h1 { font-size: clamp(1.5rem, 3vw, 2rem); margin: 0 0 16px; }
+.vet-module h2 { font-size: 1.25rem; margin-block: 20px 12px; }
+.vet-module p { margin-bottom: 12px; }
+.vet-module label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; margin-block: 10px; min-width: 0; }
+.vet-module :is(input, select, textarea) { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid var(--accent-border); border-radius: var(--radius-control); background: var(--surface); color: var(--text); }
+.vet-module textarea { min-height: 90px; }
+.vet-module button { min-height: 44px; padding: 10px 16px; border: 1px solid var(--accent); border-radius: var(--radius-control); background: var(--accent); color: var(--on-accent); cursor: pointer; margin: 5px 8px 5px 0; }
+.vet-module button:hover { background: var(--accent-hover); }
+.vet-module button:disabled { opacity: 0.5; cursor: not-allowed; }
+.vet-module .boton-eliminar { background: var(--danger-button); border-color: var(--danger-button); }
+.vet-module .boton-eliminar:hover { background: var(--danger-hover); }
+.vet-module form > button { align-self: end; justify-self: start; }
+.vet-module .tabla-contenedor { width: 100%; min-width: 0; margin-top: 16px; }
+.vet-module .tabla { max-width: 100%; overscroll-behavior-x: contain; }
+.vet-module table { min-width: 780px; }
+.vet-module :is(th, td) { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.vet-module th { background: var(--accent-bg); color: var(--text-h); }
+.vet-module .tabla input { min-width: 130px; }
+.vet-module .tabla select { min-width: 115px; }
+.vet-module .tabla button { white-space: nowrap; }
+.vet-module .aviso-deslizamiento { font-size: 0.85rem; color: var(--text-muted); }
+.vet-module .alerta { background: var(--accent-bg); border: 1px solid var(--accent-border); padding: 12px; border-radius: var(--radius-control); margin-bottom: 16px; }
+.vet-module .historial { padding: 16px; border-left: 4px solid var(--accent); background: var(--surface-soft); margin-block: 12px; }
+.vet-module .metricas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-block: 20px; }
+.vet-module .metricas > div { background: var(--accent-bg); border-radius: var(--radius-control); padding: 20px; display: flex; flex-direction: column; }
+.vet-module .metricas strong { font-size: 2rem; color: var(--accent-hover); }
+@media (max-width: 767px) { .vet-module .metricas { grid-template-columns: 1fr; } }
+/* Espacio suficiente para leer completo el rol en las tablas de usuarios. */
+.vet-module .tabla select[aria-label^="Rol "] { min-width: 190px; }

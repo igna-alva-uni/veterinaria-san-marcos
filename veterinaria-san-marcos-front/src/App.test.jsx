@@ -207,7 +207,7 @@ describe("Componentes e interacciones del módulo Daniel", () => {
     expect(screen.getByText("Pacientes registrados")).toBeInTheDocument();
   });
   it("muestra formulario de contacto", () => {
-    abrir("/contacto");
+    abrir("/contacto", dueno);
     expect(
       screen.getByRole("heading", { name: "Contacto" }),
     ).toBeInTheDocument();
@@ -393,5 +393,46 @@ describe("Eliminación de clientes y mascotas", () => {
     expect(pacientes.some((p) => p.id === 2)).toBe(true);
 
     vi.restoreAllMocks();
+  });
+});
+
+describe('Integración de navegación y sesión', () => {
+  it('conecta el header con el usuario y navega a servicios sin perder la sesión', () => {
+    abrir('/perfil', dueno);
+    const header = screen.getByRole('banner');
+    expect(within(header).getByText('Cliente')).toBeInTheDocument();
+    expect(within(header).queryByRole('link', { name: 'Usuarios' })).not.toBeInTheDocument();
+    fireEvent.click(within(header).getByRole('link', { name: 'Servicios' }));
+    expect(screen.getByRole('heading', { name: 'Servicios veterinarios' })).toBeInTheDocument();
+    expect(window.location.pathname).toBe('/servicios');
+    expect(within(header).getByRole('link', { name: 'Servicios' })).toHaveAttribute('aria-current', 'page');
+    fireEvent.click(within(header).getByRole('button', { name: 'Cerrar sesión' }));
+    expect(screen.getByRole('heading', { name: 'Iniciar sesión' })).toBeInTheDocument();
+  });
+  it('no conserva la contraseña al pasar de login a registro', () => {
+    abrir();
+    fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: 'Temporal123' } });
+    fireEvent.click(screen.getByRole('link', { name: 'Regístrate' }));
+    expect(screen.getByLabelText('Contraseña')).toHaveValue('');
+  });
+  it('rechaza una sesión persistida de una cuenta desactivada', () => {
+    localStorage.setItem('vet_usuarios', JSON.stringify([admin, recepcion, { ...dueno, activo: false }]));
+    abrir('/perfil', dueno);
+    expect(screen.getByRole('heading', { name: 'Iniciar sesión' })).toBeInTheDocument();
+  });
+  it('protege la vista de contacto sin sesión', () => {
+    abrir('/contacto');
+    expect(screen.getByRole('heading', { name: 'Iniciar sesión' })).toBeInTheDocument();
+  });
+  it('incluye navegación administrativa y cierra el menú con Escape', () => {
+    abrir('/admin/usuarios', admin);
+    const header = screen.getByRole('banner');
+    expect(within(header).getByRole('link', { name: 'Reportes' })).toBeInTheDocument();
+    const toggle = within(header).getByRole('button', { name: 'Abrir menú de navegación' });
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle).toHaveFocus();
   });
 });

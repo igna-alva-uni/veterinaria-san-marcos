@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { validarPaciente } from "../validaciones";
 
 export default function PacienteEditable({ paciente, guardar }) {
@@ -9,14 +9,6 @@ export default function PacienteEditable({ paciente, guardar }) {
   });
 
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    setDatos({
-      nombre: paciente.nombre,
-      especie: paciente.especie,
-      edad: String(paciente.edad),
-    });
-  }, [paciente.nombre, paciente.especie, paciente.edad]);
 
   const confirmar = () => {
     const fallo = validarPaciente({ ...paciente, ...datos });

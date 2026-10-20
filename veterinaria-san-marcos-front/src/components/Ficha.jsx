@@ -65,7 +65,7 @@ export default function Ficha({ pacientes, setPacientes }) {
       </label>
       <h2>Registrar atención</h2>
       {error && <p role="status">{error}</p>}
-      <form className="rejilla row g-3" onSubmit={guardar}>
+      <form className="grid grid-cols-1 gap-x-5 gap-y-3 md:grid-cols-2" onSubmit={guardar}>
         <label>
           Fecha
           <input
