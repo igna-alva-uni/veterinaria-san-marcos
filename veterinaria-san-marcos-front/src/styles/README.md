@@ -40,6 +40,10 @@ exacta se muestra únicamente la ciudad y la región del caso académico.
 El contenido entre Header y Footer debe usar un elemento `main` con
 `id="contenido"`, `tabIndex={-1}` y las clases `site-container site-main` para que
 funcionen el enlace de salto, el ancho compartido y el pie al final de la pantalla.
+`MainLayout` ya proporciona este elemento; las páginas hijas no deben repetirlo.
+`AuthLayout` proporciona su propio main para login y registro. `DashboardLayout`
+se anida dentro de MainLayout para los paneles de recepción y administración.
+La jerarquía de rutas y los permisos se explican en [la guía de layouts](../layouts/README.md).
 
 Los estilos del módulo integrado se limitan a `.vet-module` en App.css. Las
 rejillas y tablas usan utilidades Tailwind; no se importa Bootstrap.

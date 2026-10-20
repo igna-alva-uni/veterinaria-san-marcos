@@ -133,3 +133,25 @@
 @media (max-width: 650px) {
   .site-header .site-container { width: calc(100% - 32px); }
 }
+
+.layout-message {
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-control);
+  background: var(--accent-bg);
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.dashboard-layout { min-width: 0; }
+.dashboard-layout__heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  color: var(--accent-hover);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+.dashboard-layout__icon { display: inline-flex; }
+.dashboard-layout__icon svg { width: 20px; height: 20px; }

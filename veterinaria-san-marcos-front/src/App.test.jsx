@@ -499,3 +499,42 @@ describe('Accesos de carrito y perfil en el navbar', () => {
     expect(within(header).getByRole('link',{name:'Carrito',exact:true})).toHaveTextContent('Carrito');
   });
 });
+
+describe('Layouts y rutas anidadas', () => {
+  it('usa AuthLayout en registro sin repetir la estructura de la aplicación', () => {
+    const { container } = abrir('/registro');
+    expect(screen.getAllByRole('main')).toHaveLength(1);
+    expect(container.querySelector('header')).toBeNull();
+    expect(container.querySelector('footer')).toBeNull();
+    expect(container.querySelector('.auth-module')).not.toBeNull();
+  });
+  it.each([
+    ['/admin/usuarios', admin, 'Panel de administración'],
+    ['/admin/reportes', admin, 'Panel de administración'],
+    ['/recepcion/pacientes', recepcion, 'Panel de recepción'],
+    ['/recepcion/solicitudes', recepcion, 'Panel de recepción'],
+  ])('anida %s sin duplicar Header, Footer ni main', (ruta, usuario, titulo) => {
+    const { container } = abrir(ruta, usuario);
+    expect(screen.getByRole('region', {name:titulo})).toBeInTheDocument();
+    expect(screen.getAllByRole('main')).toHaveLength(1);
+    expect(container.querySelectorAll('.site-header')).toHaveLength(1);
+    expect(container.querySelectorAll('.site-footer')).toHaveLength(1);
+  });
+  it('rechaza a recepción en todo el grupo administrativo', () => {
+    abrir('/admin/reportes', recepcion);
+    expect(screen.getByRole('alert')).toHaveTextContent('Acceso denegado');
+    expect(screen.queryByRole('region', {name:'Panel de administración'})).not.toBeInTheDocument();
+  });
+  it('redirige una visita sin sesión antes de renderizar el dashboard', () => {
+    abrir('/recepcion/solicitudes');
+    expect(screen.getByRole('heading', {name:'Iniciar sesión'})).toBeInTheDocument();
+    expect(screen.queryByRole('region', {name:'Panel de recepción'})).not.toBeInTheDocument();
+  });
+  it('muestra la página 404 dentro de MainLayout', () => {
+    const { container } = abrir('/ruta-inexistente', dueno);
+    expect(screen.getByRole('heading', {name:'Página no encontrada'})).toBeInTheDocument();
+    expect(container.querySelectorAll('.site-header')).toHaveLength(1);
+    expect(screen.getAllByRole('main')).toHaveLength(1);
+    expect(container.querySelectorAll('.site-footer')).toHaveLength(1);
+  });
+});
