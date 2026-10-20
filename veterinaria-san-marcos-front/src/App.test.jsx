@@ -400,7 +400,7 @@ describe('Integración de navegación y sesión', () => {
   it('conecta el header con el usuario y navega a servicios sin perder la sesión', () => {
     abrir('/perfil', dueno);
     const header = screen.getByRole('banner');
-    expect(within(header).getByText('Cliente')).toBeInTheDocument();
+    expect(within(header).getByRole('link', {name:'Ver perfil de Cliente'})).toBeInTheDocument();
     expect(within(header).queryByRole('link', { name: 'Usuarios' })).not.toBeInTheDocument();
     fireEvent.click(within(header).getByRole('link', { name: 'Servicios' }));
     expect(screen.getByRole('heading', { name: 'Servicios veterinarios' })).toBeInTheDocument();
@@ -458,8 +458,44 @@ describe('Rutas integradas de mascotas, citas y catálogo', () => {
     fireEvent.click(agregar);
     fireEvent.click(agregar);
     expect(JSON.parse(localStorage.getItem('vsm-carrito:3')).find(p=>p.codigo==='SV001').cantidad).toBe(1);
-    fireEvent.click(within(screen.getByRole('banner')).getByRole('link',{name:'Carrito',exact:true}));
+    fireEvent.click(within(screen.getByRole('banner')).getByRole('link',{name:'Carrito, 1 elemento',exact:true}));
     expect(screen.getByRole('heading',{name:'Mi carrito'})).toBeInTheDocument();
     expect(screen.getByText('1 servicio')).toBeInTheDocument();
+  });
+});
+
+describe('Accesos de carrito y perfil en el navbar', () => {
+  it.each([admin, recepcion, dueno])('deja el carrito al final y mueve el perfil al nombre de $nombre', (usuario) => {
+    abrir('/inicio', usuario);
+    const nav = screen.getByRole('navigation', {name:'Navegación principal'});
+    const lista = within(nav).getByRole('list');
+    expect(within(lista).getAllByRole('link').at(-1)).toHaveAccessibleName('Carrito');
+    expect(within(lista).queryByRole('link', {name:'Mi perfil'})).not.toBeInTheDocument();
+    const perfil = within(nav).getByRole('link', {name:`Ver perfil de ${usuario.nombre}`});
+    expect(perfil.querySelector('svg')).not.toBeNull();
+    fireEvent.click(perfil);
+    expect(screen.getByRole('heading', {name:'Mi perfil'})).toBeInTheDocument();
+    expect(perfil).toHaveAttribute('aria-current', 'page');
+  });
+  it('actualiza el contador al agregar, cambiar cantidades y vaciar sin recargar', () => {
+    abrir('/catalogo', dueno);
+    const header = screen.getByRole('banner');
+    const carritoVacio = within(header).getByRole('link', {name:'Carrito',exact:true});
+    expect(carritoVacio).toHaveTextContent('Carrito');
+    expect(carritoVacio.querySelector('svg')).not.toBeNull();
+    const tarjeta = screen.getByRole('heading', {name:'Amoxibay 250mg',exact:true}).closest('article');
+    const agregar = within(tarjeta).getByRole('button', {name:/Agregar/});
+    fireEvent.click(agregar);
+    expect(within(header).getByRole('link',{name:'Carrito, 1 elemento'})).toHaveTextContent('1');
+    fireEvent.click(agregar);
+    const carrito = within(header).getByRole('link',{name:'Carrito, 2 elementos'});
+    expect(carrito).toHaveTextContent('2');
+    expect(carrito).not.toHaveTextContent('Carrito');
+    fireEvent.click(carrito);
+    fireEvent.click(screen.getByRole('button',{name:'Disminuir cantidad de Amoxibay 250mg'}));
+    expect(within(header).getByRole('link',{name:'Carrito, 1 elemento'})).toHaveTextContent('1');
+    fireEvent.click(screen.getByRole('button',{name:'Vaciar carrito',exact:true}));
+    fireEvent.click(screen.getByRole('button',{name:'Sí, vaciar',exact:true}));
+    expect(within(header).getByRole('link',{name:'Carrito',exact:true})).toHaveTextContent('Carrito');
   });
 });

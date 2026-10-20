@@ -1,4 +1,4 @@
-import { claveCompra, leerCarritoUsuario } from '../data/compra.js'
+import { guardarCarritoUsuario, leerCarritoUsuario } from '../data/compra.js'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
@@ -51,7 +51,7 @@ function guardarEnCarrito(elemento) {
   }
 
   try {
-    localStorage.setItem(claveCompra('vsm-carrito'), JSON.stringify(carrito))
+    guardarCarritoUsuario(carrito)
 
     return {
       ok: true,

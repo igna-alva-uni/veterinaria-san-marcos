@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { Link } from 'react-router-dom'
 import Brand from './Brand.jsx'
 import { mainNavigation } from './navigation.js'
+import { cantidadCarritoUsuario, suscribirCarrito } from './data/compra.js'
 
 // La sesión y las acciones se conectan desde el layout, sin simular autenticación.
 function Header({
@@ -13,6 +14,11 @@ function Header({
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const toggleRef = useRef(null)
+  const cantidadCarrito = useSyncExternalStore(
+    suscribirCarrito,
+    () => cantidadCarritoUsuario(user?.id),
+    () => 0,
+  )
 
   useEffect(() => {
     if (!menuOpen) return
@@ -55,13 +61,33 @@ function Header({
           <ul className="site-nav__list">
             {navigation.map(({ label, href }) => (
               <li key={href}>
-                <Link to={href} aria-current={isActive(href) ? 'page' : undefined} onClick={() => setMenuOpen(false)}>{label}</Link>
+                <Link to={href}
+                  className={href === '/carrito' ? 'site-cart-link' : undefined}
+                  aria-label={href === '/carrito' ? (cantidadCarrito ? `Carrito, ${cantidadCarrito} ${cantidadCarrito === 1 ? 'elemento' : 'elementos'}` : 'Carrito') : undefined}
+                  aria-current={isActive(href) ? 'page' : undefined}
+                  onClick={() => setMenuOpen(false)}>
+                  {href === '/carrito' ? <>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M3 3h2l2.5 12h11l2-8H6" />
+                      <circle cx="9" cy="20" r="1" /><circle cx="18" cy="20" r="1" />
+                    </svg>
+                    <span className={cantidadCarrito ? 'site-cart-count' : undefined} aria-hidden="true">{cantidadCarrito || 'Carrito'}</span>
+                  </> : label}
+                </Link>
               </li>
             ))}
           </ul>
           {user ? (
             <div className="site-session">
-              <span className="site-session__name">{user.name}</span>
+              <Link className="site-profile-link" to="/perfil"
+                aria-label={`Ver perfil de ${user.name}`}
+                title={`Mi perfil · ${user.name}`}
+                aria-current={isActive('/perfil') ? 'page' : undefined}
+                onClick={() => setMenuOpen(false)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+                  <circle cx="12" cy="8" r="4" /><path d="M4 21v-2a8 8 0 0 1 16 0v2" />
+                </svg>
+              </Link>
               {onLogout && <button className="site-button site-button--secondary" type="button" onClick={() => { setMenuOpen(false); onLogout() }}>Cerrar sesión</button>}
             </div>
           ) : onLogin && (

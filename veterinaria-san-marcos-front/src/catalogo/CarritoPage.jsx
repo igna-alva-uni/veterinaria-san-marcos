@@ -1,4 +1,4 @@
-import { claveCompra, leerCarritoUsuario } from '../data/compra.js'
+import { claveCompra, guardarCarritoUsuario, leerCarritoUsuario } from '../data/compra.js'
 import { obtenerSesion } from '../data/veterinaria.js'
 
 import { useMemo, useState } from 'react'
@@ -64,7 +64,7 @@ function CarritoPage() {
   function setProductos(valor) {
     const siguientes = typeof valor === 'function' ? valor(productos) : valor
     try {
-      localStorage.setItem(claveCompra('vsm-carrito'), JSON.stringify(siguientes))
+      guardarCarritoUsuario(siguientes)
       setProductosEstado(siguientes)
     } catch { setMensaje('No se pudo guardar el carrito en este navegador.') }
   }
@@ -186,7 +186,7 @@ function CarritoPage() {
     try {
       const pedidos = obtenerPedidos()
       localStorage.setItem(claveCompra('vsm-pedidos'), JSON.stringify([pedido, ...pedidos]))
-      localStorage.setItem(claveCompra('vsm-carrito'), JSON.stringify([]))
+      guardarCarritoUsuario([])
       setPedidoRealizado(pedido)
       setProductos([])
       setPaso('completado')

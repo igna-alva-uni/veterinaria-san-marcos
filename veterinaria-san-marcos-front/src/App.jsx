@@ -61,7 +61,7 @@ function AppInterna() {
   const roles = ['Administrador', 'Recepcionista', 'Dueño'];
   const enlaces = [
     ...mainNavigation,
-    ...(sesion ? [{ label: 'Mi perfil', href: '/perfil' }, { label: 'Catálogo', href: '/catalogo' }, { label: 'Carrito', href: '/carrito' }] : []),
+    ...(sesion ? [{ label: 'Catálogo', href: '/catalogo' }] : []),
     ...(sesion?.rol === 'Dueño' ? [
       { label: 'Mis mascotas', href: '/mascotas' }, { label: 'Solicitar cita', href: '/citas/nueva' }, { label: 'Mis citas', href: '/mis-citas' },
     ] : []),
@@ -73,6 +73,7 @@ function AppInterna() {
       { label: 'Pacientes', href: '/recepcion/pacientes' },
       { label: 'Solicitudes', href: '/recepcion/solicitudes' },
     ] : []),
+    ...(sesion ? [{ label: 'Carrito', href: '/carrito' }] : []),
   ];
   useEffect(
     () => localStorage.setItem("vet_usuarios", JSON.stringify(usuarios)),
@@ -164,7 +165,7 @@ function AppInterna() {
   return (
     <>
       {!esAutenticacion && <Header navigation={enlaces} activePath={pathname}
-        user={sesion ? { name: sesion.nombre } : null}
+        user={sesion ? { id: sesion.id, name: sesion.nombre } : null}
         onLogout={cerrarSesion} onLogin={() => ir('/login')} />}
       <main id="contenido" className={`site-container site-main ${esAutenticacion ? 'auth-module' : ''}`} tabIndex={-1}>
       <div className={esModuloNuevo ? "feature-module" : "vet-module"}>
