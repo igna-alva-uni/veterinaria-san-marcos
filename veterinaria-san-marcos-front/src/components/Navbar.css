@@ -1,0 +1,179 @@
+
+.navbar-veterinaria {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  width: 100%;
+  min-height: 112px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 14px clamp(20px, 3vw, 48px);
+  border-bottom: 1px solid #dcebef;
+  background: #fff;
+  box-shadow: 0 5px 22px rgba(18, 48, 82, 0.07);
+}
+
+.navbar-marca {
+  display: flex;
+  min-width: 0;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: 14px;
+  color: #123052;
+  text-decoration: none;
+}
+
+.navbar-logo-imagen {
+  display: block;
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+.navbar-marca-texto {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.navbar-marca strong {
+  display: block;
+  color: #123052;
+  font-size: clamp(1.35rem, 1.7vw, 1.85rem);
+  font-weight: 850;
+  letter-spacing: -0.8px;
+}
+
+.navbar-marca small {
+  display: block;
+  margin-top: 4px;
+  color: #078b9a;
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.navbar-eslogan {
+  display: block;
+  margin-top: 7px;
+  color: #8493a2;
+  font-size: 0.75rem;
+  font-style: italic;
+  font-weight: 500;
+}
+
+.navbar-enlaces {
+  display: flex;
+  min-width: 0;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.navbar-enlace {
+  display: inline-flex;
+  min-height: 44px;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  padding: 10px clamp(10px, 1.1vw, 17px);
+  border: 1px solid transparent;
+  border-radius: 14px;
+  color: #243b58;
+  font-size: 0.9rem;
+  font-weight: 700;
+  white-space: nowrap;
+  text-decoration: none;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.navbar-enlace:hover {
+  transform: translateY(-1px);
+  background: #f0f9fb;
+  color: #087f8c;
+}
+
+.navbar-enlace.activo {
+  border-color: #d8eff3;
+  background: #e4f5f8;
+  color: #123052;
+  box-shadow: 0 3px 10px rgba(8, 127, 140, 0.07);
+}
+
+.navbar-enlace:focus-visible,
+.navbar-marca:focus-visible {
+  outline: 3px solid #80d4dc;
+  outline-offset: 3px;
+}
+
+@media (max-width: 1100px) {
+  .navbar-veterinaria {
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    padding: 14px 24px;
+  }
+
+  .navbar-marca {
+    flex: 1 1 100%;
+  }
+
+  .navbar-enlaces {
+    width: 100%;
+    flex: 1 1 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  .navbar-veterinaria {
+    gap: 12px;
+    padding: 12px 16px;
+  }
+
+  .navbar-logo-imagen {
+    width: 60px;
+    height: 60px;
+  }
+
+  .navbar-marca {
+    gap: 10px;
+  }
+
+  .navbar-marca strong {
+    font-size: 1.4rem;
+  }
+
+  .navbar-marca small {
+    font-size: 0.85rem;
+  }
+
+  .navbar-eslogan {
+    font-size: 0.65rem;
+  }
+
+  .navbar-enlaces {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .navbar-enlace {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: 9px 5px;
+    font-size: 0.8rem;
+    white-space: normal;
+  }
+}

@@ -1,0 +1,44 @@
+/* Paleta compartida basada en la ficha de mascotas. */
+:root {
+  --text: #29435e;
+  --text-h: #123052;
+  --text-muted: #52697e;
+  --bg: #f5f9fb;
+  --surface: #ffffff;
+  --surface-soft: #f9fcfd;
+  --border: #e1ebef;
+  --accent: #087f8c;
+  --accent-hover: #07566b;
+  --accent-bg: #f0fafb;
+  --accent-border: #cce8ec;
+  --hero-start: #e0f5f6;
+  --hero-end: #f7fcfd;
+  --focus: #087f8c;
+  --success: #17634e;
+  --success-bg: #e7f7ef;
+  --success-border: #b9e8d0;
+  --danger: #a52828;
+  --danger-bg: #fff0f0;
+  --danger-border: #f1c5c5;
+  --danger-button: #c93636;
+  --danger-hover: #a82424;
+  --on-accent: #ffffff;
+  --shadow: 0 7px 25px rgb(18 48 82 / 5%);
+  --radius-card: 22px;
+  --radius-control: 12px;
+  --content-width: 1040px;
+  /* Compatibilidad con los estilos de la pantalla actual. */
+  --code-bg: var(--accent-bg);
+  --social-bg: var(--surface);
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: var(--sans);
+  --mono: ui-monospace, Consolas, monospace;
+  font: 16px/1.6 var(--sans);
+  color-scheme: light;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

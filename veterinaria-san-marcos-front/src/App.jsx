@@ -1,122 +1,380 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import Formulario from "./components/Formulario";
+import Reportes from "./components/Reportes";
+import Ficha from "./components/Ficha";
+import Usuarios from "./components/Usuarios";
+import Pacientes from "./components/Pacientes";
 
-function App() {
-  const [count, setCount] = useState(0)
-
+import { useEffect, useState } from "react";
+import {
+  BrowserRouter,
+  Link,
+  Navigate,
+  Route,
+  Routes,
+  useNavigate,
+  useLocation
+} from "react-router-dom";
+import { usuariosIniciales } from "./datos";
+import {
+  correoValido,
+  correoValidoParaRol,
+  claveValida,
+  textoRequerido,
+  validarRegistro,
+  validarPerfil
+} from "./validaciones";
+import "./App.css";
+import MainLayout from './layouts/MainLayout.jsx';
+import AuthLayout from './layouts/AuthLayout.jsx';
+import DashboardLayout from './layouts/DashboardLayout.jsx';
+import ContentLayout from './layouts/ContentLayout.jsx';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
+import { mainNavigation } from './navigation.js';
+import { clinica } from './data/clinica.js';
+import InicioPage from './features/clinica/InicioPage.jsx';
+import ServiciosPage from './features/clinica/ServiciosPage.jsx';
+import UbicacionPage from './features/clinica/UbicacionPage.jsx';
+import MascotasPage from './features/mascotas/MascotasPage.jsx';
+import DetalleMascotaPage from './features/mascotas/DetalleMascotaPage.jsx';
+import SolicitarCitaPage from './features/citas/SolicitarCitaPage.jsx';
+import MisCitasPage from './features/citas/MisCitasPage.jsx';
+import DetalleCitaPage from './features/citas/DetalleCitaPage.jsx';
+import RecepcionSolicitudesPage from './features/citas/RecepcionSolicitudesPage.jsx';
+import CatalogoPage from './catalogo/CatalogoPage.jsx';
+import CarritoPage from './catalogo/CarritoPage.jsx';
+import PanelPage from './features/dashboard/PanelPage.jsx';
+import { EVENTO_PACIENTES, leerPacientesCompartidos } from './data/veterinaria.js';
+const leer = (clave, defecto) => {
+  try {
+    return JSON.parse(localStorage.getItem(clave)) ?? defecto;
+  } catch {
+    return defecto;
+  }
+};
+function AppInterna() {
+  const [usuarios, setUsuarios] = useState(() =>
+    leer("vet_usuarios", usuariosIniciales),
+  );
+  const [pacientes, setPacientes] = useState(() =>
+    leerPacientesCompartidos(),
+  );
+  const [sesionGuardada, setSesion] = useState(() => leer("vet_sesion", null));
+  const sesion = usuarios.find((usuario) => usuario.id === sesionGuardada?.id && usuario.activo) || null;
+  const [mensaje, setMensaje] = useState("");
+  const navegar = useNavigate();
+  const { pathname } = useLocation();
+  const roles = ['Administrador', 'Recepcionista', 'Dueño'];
+  const enlaces = [
+    ...mainNavigation,
+    ...(sesion ? [{ label: 'Catálogo', href: '/catalogo' }] : []),
+    ...(sesion?.rol === 'Dueño' ? [
+      { label: 'Mis mascotas', href: '/mascotas' }, { label: 'Solicitar cita', href: '/citas/nueva' }, { label: 'Mis citas', href: '/mis-citas' },
+    ] : []),
+    ...(sesion?.rol === 'Administrador' ? [
+      { label: 'Administración', href: '/admin' },
+    ] : []),
+    ...(['Administrador', 'Recepcionista'].includes(sesion?.rol) ? [
+      { label: 'Recepción', href: '/recepcion' },
+    ] : []),
+    ...(sesion ? [{ label: 'Carrito', href: '/carrito' }] : []),
+  ];
+  useEffect(
+    () => localStorage.setItem("vet_usuarios", JSON.stringify(usuarios)),
+    [usuarios],
+  );
+  useEffect(
+    () => localStorage.setItem("vet_pacientes", JSON.stringify(pacientes)),
+    [pacientes],
+  );
+  useEffect(
+    () => localStorage.setItem("vet_sesion", JSON.stringify(sesion)),
+    [sesion],
+  );
+  useEffect(() => {
+    const sincronizar = () => setPacientes(leerPacientesCompartidos());
+    window.addEventListener(EVENTO_PACIENTES, sincronizar);
+    return () => window.removeEventListener(EVENTO_PACIENTES, sincronizar);
+  }, []);
+  const ir = (ruta) => {
+    setMensaje("");
+    navegar(ruta);
+  };
+  const cerrarSesion = () => {
+    setSesion(null);
+    localStorage.removeItem("vet_sesion");
+    ir("/login");
+  };
+  const entrar = (correo = "", clave = "") => {
+    const usuario = usuarios.find(
+      (u) => u.correo.toLowerCase() === correo.toLowerCase().trim() && u.activo,
+    );
+    if (
+      !usuario ||
+      !correoValidoParaRol(correo, usuario.rol) ||
+      !claveValida(clave) ||
+      usuario.clave !== clave
+    ) {
+      setMensaje("Credenciales inválidas o usuario desactivado");
+      return;
+    }
+    setSesion(usuario);
+    ir(
+      usuario.rol === "Administrador"
+        ? "/admin"
+        : usuario.rol === "Recepcionista"
+          ? "/recepcion"
+          : "/inicio",
+    );
+  };
+  const registrar = (datos) => {
+    const error = validarRegistro(datos);
+    if (error) {
+      setMensaje(error);
+      return;
+    }
+    if (
+      usuarios.some(
+        (u) => u.correo.toLowerCase() === datos.correo.trim().toLowerCase(),
+      )
+    ) {
+      setMensaje("Correo ya registrado");
+      return;
+    }
+    const nuevo = {
+      id: Date.now(),
+      nombre: datos.nombre.trim(),
+      correo: datos.correo.trim().toLowerCase(),
+      telefono: datos.telefono,
+      clave: datos.clave,
+      rol: "Dueño",
+      activo: true,
+    };
+    setUsuarios((v) => [...v, nuevo]);
+    setMensaje(
+      "Cuenta creada. Ingresa con tu correo y contraseña.",
+    );
+    navegar("/login");
+  };
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <Routes>
+      <Route element={<AuthLayout message={mensaje} />}>
+        <Route
+          path="/login"
+          element={
+            <Formulario
+              key="login"
+              titulo="Iniciar sesión"
+              campos={[
+                ["correo", "Correo electrónico", "email"],
+                ["clave", "Contraseña", "password"],
+              ]}
+              boton="Ingresar"
+              enviar={(d) => entrar(d.correo, d.clave)}
+              pie={
+                <p>
+                  ¿No tienes cuenta? <Link to="/registro">Regístrate</Link>
+                </p>
+              }
+            />
+          }
+        />
+        <Route
+          path="/registro"
+          element={
+            <Formulario
+              key="registro"
+              titulo="Registro de dueño de mascota"
+              campos={[
+                ["nombre", "Nombre completo"],
+                ["correo", "Correo electrónico", "email"],
+                ["telefono", "Teléfono"],
+                ["clave", "Contraseña", "password"],
+              ]}
+              boton="Crear cuenta"
+              enviar={registrar}
+            />
+          }
+        />
+      </Route>
+      <Route
+        element={
+          <MainLayout
+            navigation={enlaces}
+            user={sesion ? { id: sesion.id, name: sesion.nombre } : null}
+            onLogout={cerrarSesion}
+            onLogin={() => ir('/login')}
+            message={mensaje}
+          />
+        }
+      >
+        <Route path="/" element={<Navigate to={sesion ? "/inicio" : "/login"} replace />} />
+        <Route element={<ProtectedRoute user={sesion} roles={roles} />}>
+          <Route element={<ContentLayout />}>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+            <Route
+              path="/perfil"
+              element={
+                <section className="tarjeta">
+                  <h1>Mi perfil</h1>
+                  <Formulario
+                    key={sesion?.id}
+                    titulo="Actualizar mis datos"
+                    inicial={sesion || {}}
+                    campos={[
+                      ["nombre", "Nombre"],
+                      ["telefono", "Teléfono"],
+                    ]}
+                    boton="Guardar cambios"
+                    enviar={(d) => {
+                      const fallo = validarPerfil(d);
+                      if (fallo) {
+                        setMensaje(fallo);
+                        return;
+                      }
+                      const actualizado = {
+                        ...sesion,
+                        nombre: d.nombre.trim(),
+                        telefono: d.telefono,
+                      };
+                      setSesion(actualizado);
+                      setUsuarios((v) =>
+                        v.map((u) => (u.id === actualizado.id ? actualizado : u)),
+                      );
+                      setMensaje("Perfil actualizado");
+                    }}
+                  />
+                  {sesion?.rol === "Dueño" && (
+                    <>
+                      <h2>Mis mascotas</h2>
+                      {pacientes
+                        .filter((x) => x.duenoId === sesion.id)
+                        .map((x) => (
+                          <p key={x.id}>
+                            {x.nombre} · {x.especie} · {(x.historial || []).length}{" "}
+                            atenciones registradas
+                          </p>
+                        ))}
+                    </>
+                  )}
+                </section>
+              }
+            />
+            <Route
+              path="/contacto"
+              element={
+                <section className="tarjeta">
+                  <h1>Contacto</h1>
+                  <p>Veterinaria San Marcos · Rancagua, Chile.</p>
+                  <p>
+                    {clinica.direccion}
+                  </p>
+                  <Link to="/ubicacion">Ver mapa e indicaciones</Link>
+                  <Formulario
+                    key="contacto"
+                    titulo="Formulario de contacto"
+                    campos={[
+                      ["nombre", "Nombre"],
+                      ["correo", "Correo", "email"],
+                      ["consulta", "Consulta", "textarea"],
+                    ]}
+                    boton="Enviar consulta"
+                    enviar={(d) => {
+                      if (!textoRequerido(d.nombre) || !textoRequerido(d.consulta) || !correoValido(d.correo)) {
+                        setMensaje('Completa los datos correctamente');
+                        return;
+                      }
+                      try {
+                        const guardadas = leer('vet_consultas', []);
+                        const consultas = Array.isArray(guardadas) ? guardadas : [];
+                        localStorage.setItem('vet_consultas', JSON.stringify([...consultas, {
+                          ...d, id: Date.now(), usuarioId: sesion.id, fecha: new Date().toISOString(),
+                        }]));
+                        setMensaje('Consulta registrada');
+                      } catch { setMensaje('No se pudo guardar la consulta. Inténtalo nuevamente.'); }
+                    }}
+                  />
+                </section>
+              }
+            />
+          </Route>
+          <Route element={<ContentLayout variant="feature" />}>
+            <Route path="/inicio" element={<InicioPage usuario={sesion} pacientes={pacientes} />} />
+            <Route path="/servicios" element={<ServiciosPage usuario={sesion} />} />
+            <Route path="/ubicacion" element={<UbicacionPage />} />
+            <Route path="/catalogo" element={<CatalogoPage key={sesion?.id} />} />
+            <Route path="/carrito" element={<CarritoPage key={sesion?.id} />} />
+            <Route path="/mis-citas" element={<MisCitasPage />} />
+            <Route path="/mis-citas/:id" element={<DetalleCitaPage key={pathname} />} />
+            <Route element={<ProtectedRoute user={sesion} roles={['Dueño']} />}>
+              <Route path="/mascotas" element={<MascotasPage />} />
+              <Route path="/mascotas/:id" element={<DetalleMascotaPage key={pathname} pacientes={pacientes} usuario={sesion} />} />
+              <Route path="/citas/nueva" element={<SolicitarCitaPage />} />
+            </Route>
+          </Route>
+          <Route element={<ProtectedRoute user={sesion} roles={['Administrador', 'Recepcionista']} />}>
+            <Route element={<DashboardLayout title="Panel de recepción" homePath="/recepcion" />}>
+              <Route element={<ContentLayout />}>
+                <Route
+                  path="/recepcion/pacientes"
+                  element={
+                    <Pacientes
+                      pacientes={pacientes}
+                      setPacientes={setPacientes}
+                      usuarios={usuarios}
+                      ir={ir}
+                    />
+                  }
+                />
+                <Route path="/recepcion/pacientes/:id" element={<Ficha pacientes={pacientes} setPacientes={setPacientes} />} />
+              </Route>
+              <Route element={<ContentLayout variant="feature" />}>
+                <Route path="/recepcion" element={<PanelPage tipo="recepcion" usuario={sesion} usuarios={usuarios} pacientes={pacientes} />} />
+                <Route path="/recepcion/solicitudes" element={<RecepcionSolicitudesPage />} />
+              </Route>
+            </Route>
+          </Route>
+          <Route element={<ProtectedRoute user={sesion} roles={['Administrador']} />}>
+            <Route element={<DashboardLayout title="Panel de administración" homePath="/admin" />}>
+              <Route element={<ContentLayout />}>
+                <Route
+                  path="/admin/usuarios"
+                  element={
+                    <Usuarios
+                      usuarios={usuarios}
+                      setUsuarios={setUsuarios}
+                      setMensaje={setMensaje}
+                      sesion={sesion}
+                      pacientes={pacientes}
+                    />
+                  }
+                />
+                <Route path="/admin/reportes" element={<Reportes pacientes={pacientes} usuarios={usuarios} />} />
+              </Route>
+              <Route element={<ContentLayout variant="feature" />}>
+                <Route path="/admin" element={<PanelPage tipo="admin" usuario={sesion} usuarios={usuarios} pacientes={pacientes} />} />
+              </Route>
+            </Route>
+          </Route>
+        </Route>
+        <Route element={<ContentLayout />}>
+          <Route
+            path="*"
+            element={
+              <section className="tarjeta">
+                <h1>Página no encontrada</h1>
+                <Link to="/">Volver</Link>
+              </section>
+            }
+          />
+        </Route>
+      </Route>
+    </Routes>
+  );
 }
-
-export default App
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppInterna />
+    </BrowserRouter>
+  );
+}

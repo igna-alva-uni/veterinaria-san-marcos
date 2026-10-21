@@ -1,0 +1,11 @@
+.clinical-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: clamp(18px, 3vw, 30px); margin-block: 24px; min-width: 0; }
+.clinical-section h2 { margin-bottom: 12px; }
+.clinical-section p { margin-block: 8px; overflow-wrap: anywhere; }
+.clinical-list { list-style: none; padding: 0; margin: 16px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 16px; }
+.clinical-list li, .clinical-entry { padding: 18px; border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--surface-soft); min-width: 0; overflow-wrap: anywhere; }
+.clinical-entry { margin-top: 16px; }
+.clinical-entry h3 { margin: 0 0 12px; font-size: 1.05rem; }
+.vaccine-state { display: block; width: fit-content; margin-block: 10px; border-radius: 8px; padding: 4px 10px; background: var(--accent-bg); color: var(--text-h); font-weight: 700; }
+.vaccine-state--warning { background: #fff0cf; color: #744100; border: 1px solid #e4bb66; }
+.clinical-links { display: flex; flex-wrap: wrap; gap: 12px 24px; margin-top: 12px; }
+.clinical-links a { color: var(--accent-hover); font-weight: 700; text-decoration: underline; }
