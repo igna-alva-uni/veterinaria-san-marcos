@@ -1,0 +1,42 @@
+.panel-page { color: var(--text); }
+.panel-page h1 { font-size: clamp(1.7rem,3.5vw,2.5rem); margin: 10px 0 14px; line-height: 1.2; }
+.panel-page h2 { font-size: 1.35rem; margin: 0 0 18px; }
+.panel-page h3 { font-weight: 750; font-size: 1rem; color: var(--text-h); margin: 0 0 6px; }
+.panel-welcome { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 30px; border: 1px solid var(--accent-border); border-radius: var(--radius-card); background: linear-gradient(120deg,var(--hero-start),var(--hero-end)); }
+.panel-welcome .site-button { flex-shrink: 0; }
+.panel-welcome p { font-size: 0.95rem; color: var(--text-muted); }
+.panel-eyebrow { color: var(--accent-hover); font-size: 0.75rem; font-weight: 750; letter-spacing: 0.08em; text-transform: uppercase; }
+.panel-metrics { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px; margin-block: 24px 32px; }
+.panel-metric { display: flex; flex-direction: column; gap: 10px; padding: 22px; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; color: var(--text-muted); font-size: 0.85rem; text-decoration: none; box-shadow: var(--shadow); }
+.panel-metric strong { font-size: 2.2rem; line-height: 1.2; color: var(--text-h); font-weight: 800; }
+.panel-metric-link { margin-top: auto; color: var(--accent-hover); font-size: 0.78rem; font-weight: 650; }
+.panel-metric:hover, .panel-shortcut:hover { border-color: var(--accent); }
+.panel-section { margin-top: 30px; }
+.panel-shortcuts { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.panel-shortcut { display: flex; align-items: center; gap: 16px; padding: 22px; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); color: var(--text); text-decoration: none; }
+.panel-shortcut > div { flex: 1; min-width: 0; }
+.panel-shortcut p { color: var(--text-muted); font-size: 0.85rem; }
+.panel-icon { display: grid; place-items: center; width: 42px; height: 42px; flex-shrink: 0; border-radius: 12px; background: var(--accent-bg); color: var(--accent-hover); font-size: 1.3rem; }
+.panel-agenda { padding: 26px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); }
+.panel-section-heading { display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap; }
+.panel-page a:not(.site-button):hover { color: var(--accent-hover); }
+.panel-section-heading > a, .panel-empty a { display: inline-flex; align-items: center; min-height: 44px; gap: 8px; color: var(--accent-hover); font-weight: 650; font-size: 0.85rem; }
+.panel-table-scroll { overflow-x: auto; margin-top: 14px; }
+.panel-table-scroll table { width: 100%; min-width: 680px; border-collapse: collapse; text-align: left; font-size: 0.85rem; }
+.panel-table-scroll th { background: var(--accent-bg); font-weight: 700; color: var(--text-h); }
+.panel-table-scroll :is(th,td) { padding: 14px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.panel-table-scroll a { display: inline-flex; align-items: center; min-height: 44px; gap: 8px; white-space: nowrap; }
+.panel-table-scroll:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.panel-state { display: inline-block; padding: 5px 9px; border-radius: 8px; background: var(--accent-bg); color: var(--accent-hover); font-size: 0.75rem; font-weight: 650; }
+.panel-state--confirmed { background: var(--success-bg); color: var(--success); }
+.panel-empty { padding: 30px 12px; text-align: center; color: var(--text-muted); }
+.panel-empty > span { display: inline-grid; place-items: center; width: 42px; height: 42px; margin-bottom: 12px; border-radius: 50%; background: var(--accent-bg); color: var(--accent); }
+.panel-empty p { font-size: 0.9rem; }
+@media (max-width: 767px) {
+  .panel-welcome { flex-direction: column; align-items: flex-start; padding: 22px; }
+  .panel-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+  .panel-metric { padding: 18px; }
+  .panel-shortcuts { grid-template-columns: 1fr; }
+  .panel-agenda { padding: 20px; }
+}
+@media (max-width: 390px) { .panel-metrics { grid-template-columns: 1fr; } }
