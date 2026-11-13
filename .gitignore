@@ -148,3 +148,4 @@ dist
 .git
 .vscode
 /target/**
+*.env*
