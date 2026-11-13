@@ -1,10 +1,93 @@
+x-backend-service: &backend-service
+  depends_on:
+    postgres:
+      condition: service_healthy
+    eureka:
+      condition: service_started
+
+x-backend-env: &backend-env
+  DB_URL: jdbc:postgresql://postgres:5432/veterinaria
+  EUREKA_URL: http://eureka:8761/eureka/
+
 services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: veterinaria
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Configura POSTGRES_PASSWORD en .env}
+      DB_USUARIOS_PASSWORD: ${DB_USUARIOS_PASSWORD:?Configura DB_USUARIOS_PASSWORD en .env}
+      DB_PACIENTES_PASSWORD: ${DB_PACIENTES_PASSWORD:?Configura DB_PACIENTES_PASSWORD en .env}
+      DB_CITAS_PASSWORD: ${DB_CITAS_PASSWORD:?Configura DB_CITAS_PASSWORD en .env}
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./veterinaria-san-marcos-back/init-multi-db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "postgres", "-d", "veterinaria"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  eureka:
+    build:
+      context: ./veterinaria-san-marcos-back
+      args:
+        APP_MODULE: eureka
+    ports:
+      - "127.0.0.1:8761:8761"
+
+  ms-usuarios:
+    <<: *backend-service
+    build:
+      context: ./veterinaria-san-marcos-back
+      args:
+        APP_MODULE: ms-usuarios
+    environment:
+      <<: *backend-env
+      DB_USUARIOS_PASSWORD: ${DB_USUARIOS_PASSWORD}
+
+  ms-pacientes:
+    <<: *backend-service
+    build:
+      context: ./veterinaria-san-marcos-back
+      args:
+        APP_MODULE: ms-pacientes
+    environment:
+      <<: *backend-env
+      DB_PACIENTES_PASSWORD: ${DB_PACIENTES_PASSWORD}
+
+  ms-citas:
+    <<: *backend-service
+    build:
+      context: ./veterinaria-san-marcos-back
+      args:
+        APP_MODULE: ms-citas
+    environment:
+      <<: *backend-env
+      DB_CITAS_PASSWORD: ${DB_CITAS_PASSWORD}
+
+  ms-api-gateway:
+    build:
+      context: ./veterinaria-san-marcos-back
+      args:
+        APP_MODULE: ms-api-gateway
+    depends_on:
+      - eureka
+    environment:
+      EUREKA_URL: http://eureka:8761/eureka/
+    ports:
+      - "127.0.0.1:9001:9001"
+
   frontend:
     build:
-      context: ./veterinaria-san-marcos-Front
+      context: ./veterinaria-san-marcos-front
     ports:
       - "5173:5173"
     volumes:
-      - ./veterinaria-san-marcos-Front:/app
+      - ./veterinaria-san-marcos-front:/app
       - /app/node_modules
     command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  postgres-data:

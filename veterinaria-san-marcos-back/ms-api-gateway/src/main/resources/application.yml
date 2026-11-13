@@ -6,25 +6,55 @@ server:
 spring:
   application:
     name: ms-api-gateway
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5433/api-gateway
-    username: postgres
-    password: 123
-  jpa:
-    hibernate:
-      ddl-auto: update
-    database: postgresql
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: usuarios
+              uri: lb://ms-usuarios
+              predicates:
+                - Path=/api/v1/auth/**,/api/v1/usuarios/**
+            - id: pacientes
+              uri: lb://ms-pacientes
+              predicates:
+                - Path=/api/v1/pacientes/**
+            - id: citas
+              uri: lb://ms-citas
+              predicates:
+                - Path=/api/v1/citas/**,/api/v1/servicios/**
+            - id: usuarios-openapi
+              uri: lb://ms-usuarios
+              predicates:
+                - Path=/openapi/usuarios
+              filters:
+                - SetPath=/v3/api-docs
+            - id: pacientes-openapi
+              uri: lb://ms-pacientes
+              predicates:
+                - Path=/openapi/pacientes
+              filters:
+                - SetPath=/v3/api-docs
+            - id: citas-openapi
+              uri: lb://ms-citas
+              predicates:
+                - Path=/openapi/citas
+              filters:
+                - SetPath=/v3/api-docs
+
+springdoc:
+  swagger-ui:
+    disable-swagger-default-url: true
+    urls:
+      - name: Usuarios
+        url: /openapi/usuarios
+      - name: Pacientes
+        url: /openapi/pacientes
+      - name: Citas
+        url: /openapi/citas
 
 eureka:
   client:
-    register-with-eureka: true
-    fetch-registry: true
+    register-with-eureka: false
     service-url:
-      defaultZone: http://localhost:8761/eureka
-  instance:
-    prefer-ip-address: true
-    instance-id: "${spring.application.name}:${random.value}"
-    lease-renewal-interval-in-seconds: 15
-    lease-expiration-duration-in-seconds: 60
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
