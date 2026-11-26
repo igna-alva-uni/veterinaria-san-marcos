@@ -1,14 +1,11 @@
-import { serviciosCatalogo } from '../../data/catalogo.js'
-
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   obtenerMascotas,
   registrarCita,
 } from '../../data/veterinaria.js'
+import { useCatalogo } from '../../api/catalogo.js'
 import './SolicitarCitaPage.css'
-
-const servicios = serviciosCatalogo.map(servicio => servicio.nombre)
 
 const horarios = [
   '09:00',
@@ -31,12 +28,16 @@ function obtenerFechaLocal() {
 
 function SolicitarCitaPage() {
   const [parametros] = useSearchParams()
-  const [mascotas] = useState(() => obtenerMascotas())
+  const [mascotas, setMascotas] = useState([])
+  const [cargandoMascotas, setCargandoMascotas] = useState(true)
+  const { servicios } = useCatalogo()
+  const [enviando, setEnviando] = useState(false)
   const [mascotaId, setMascotaId] = useState(
     () => parametros.get('mascotaId') || '',
   )
+  // Se guarda el código del servicio (SV001...), que es lo que recibe POST /api/v1/citas.
   const [servicio, setServicio] = useState(
-    () => serviciosCatalogo.find(s => s.codigo === parametros.get('servicio'))?.nombre || '',
+    () => parametros.get('servicio') || '',
   )
   const [fecha, setFecha] = useState('')
   const [hora, setHora] = useState('')
@@ -46,7 +47,17 @@ function SolicitarCitaPage() {
 
   const fechaMinima = obtenerFechaLocal()
 
-  function solicitarCita(event) {
+  useEffect(() => {
+    obtenerMascotas()
+      .then(setMascotas)
+      .catch((error) => {
+        setMensaje(error.message)
+        setTipoMensaje('error')
+      })
+      .finally(() => setCargandoMascotas(false))
+  }, [])
+
+  async function solicitarCita(event) {
     event.preventDefault()
     setMensaje('')
 
@@ -62,14 +73,15 @@ function SolicitarCitaPage() {
       return
     }
 
-    const resultado = registrarCita({
+    setEnviando(true)
+    const resultado = await registrarCita({
       mascotaId,
-      servicio,
+      codigoServicio: servicio,
       fecha,
       hora,
       motivo,
-      precio: serviciosCatalogo.find(s => s.nombre === servicio)?.precio,
     })
+    setEnviando(false)
 
     if (!resultado.ok) {
       setMensaje(resultado.mensaje)
@@ -125,7 +137,9 @@ function SolicitarCitaPage() {
               <p className="citas-obligatorios">Los campos marcados con * son obligatorios.</p>
             </div>
 
-            {mascotas.length === 0 ? (
+            {cargandoMascotas ? (
+              <p role="status">Cargando tus mascotas...</p>
+            ) : mascotas.length === 0 ? (
               <div className="citas-sin-mascotas" role="status">
                 <span aria-hidden="true">🐾</span>
                 <h3>Primero registra una mascota</h3>
@@ -171,9 +185,9 @@ function SolicitarCitaPage() {
                     required
                   >
                     <option value="">Selecciona un servicio</option>
-                    {servicios.map((nombre) => (
-                      <option key={nombre} value={nombre}>
-                        {nombre}
+                    {servicios.map((elemento) => (
+                      <option key={elemento.codigo} value={elemento.codigo}>
+                        {elemento.nombre} · {elemento.especie}
                       </option>
                     ))}
                   </select>
@@ -235,8 +249,8 @@ function SolicitarCitaPage() {
                   </small>
                 </div>
 
-                <button type="submit" className="citas-boton">
-                  Solicitar cita <span aria-hidden="true">→</span>
+                <button type="submit" className="citas-boton" disabled={enviando}>
+                  {enviando ? 'Enviando solicitud...' : 'Solicitar cita'} <span aria-hidden="true">→</span>
                 </button>
 
                 {mensaje && (

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { categoriasServicios, serviciosCatalogo } from '../../data/catalogo.js'
+import { useCatalogo } from '../../api/catalogo.js'
 import ServicioCard from './ServicioCard.jsx'
 import './ClinicaPages.css'
 
@@ -10,9 +10,12 @@ export default function ServiciosPage({ usuario }) {
   const [busqueda, setBusqueda] = useState('')
   const [categoria, setCategoria] = useState('Todas')
   const [orden, setOrden] = useState('nombre')
+  // Servicios activos desde GET /api/v1/servicios (ms-citas).
+  const { servicios: serviciosCatalogo, cargando, error } = useCatalogo()
+  const categoriasServicios = useMemo(() => [...new Set(serviciosCatalogo.map(s => s.categoria))], [serviciosCatalogo])
   const servicios = useMemo(() => serviciosCatalogo.filter(s =>
     (categoria === 'Todas' || s.categoria === categoria) && normalizar(`${s.nombre} ${s.categoria} ${s.especie}`).includes(normalizar(busqueda.trim()))
-  ).sort((a,b) => orden === 'precio' ? a.precio-b.precio : a.nombre.localeCompare(b.nombre,'es')), [busqueda,categoria,orden])
+  ).sort((a,b) => orden === 'precio' ? a.precio-b.precio : a.nombre.localeCompare(b.nombre,'es')), [serviciosCatalogo,busqueda,categoria,orden])
   function limpiar() { setBusqueda(''); setCategoria('Todas'); setOrden('nombre') }
   return (
     <div className="clinic-page">
@@ -23,7 +26,8 @@ export default function ServiciosPage({ usuario }) {
           <label>Categoría<select value={categoria} onChange={e=>setCategoria(e.target.value)}><option>Todas</option>{categoriasServicios.map(c=><option key={c}>{c}</option>)}</select></label>
           <label>Ordenar por<select value={orden} onChange={e=>setOrden(e.target.value)}><option value="nombre">Nombre</option><option value="precio">Menor precio</option></select></label>
         </div>
-        <div className="clinic-results"><p role="status">{servicios.length} {servicios.length===1?'servicio disponible':'servicios disponibles'}</p><button type="button" className="clinic-clear" onClick={limpiar}>Limpiar filtros</button></div>
+        {error && <p role="alert">{error}</p>}
+        <div className="clinic-results"><p role="status">{cargando ? 'Cargando servicios...' : ''} {servicios.length} {servicios.length===1?'servicio disponible':'servicios disponibles'}</p><button type="button" className="clinic-clear" onClick={limpiar}>Limpiar filtros</button></div>
         {servicios.length ? <div className="clinic-grid clinic-grid--services">{servicios.map(s=><ServicioCard key={s.codigo} servicio={s} rol={usuario.rol} />)}</div> : <div className="clinic-empty"><h2>No encontramos servicios</h2><p>Prueba otro término o selecciona otra categoría.</p><button className="site-button" onClick={limpiar}>Mostrar todos</button></div>}
         <p className="clinic-note">Valores en pesos chilenos. La atención queda sujeta a evaluación y confirmación de la clínica.</p>
       </section>

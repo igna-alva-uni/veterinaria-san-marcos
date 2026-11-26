@@ -1,5 +1,5 @@
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   actualizarMascota,
@@ -17,21 +17,40 @@ const especies = {
   Otro: '🐾',
 }
 
-function DetalleMascotaPage({ pacientes = [], usuario }) {
-  const { id } = useParams()
-  const navigate = useNavigate()
-
-  const mascota = pacientes.find(p => String(p.id) === String(id) && String(p.duenoId) === String(usuario?.id)) || null
-  const [editando, setEditando] = useState(false)
-  const [mensaje, setMensaje] = useState('')
-  const [error, setError] = useState('')
-  const [formulario, setFormulario] = useState(() => ({
+function formularioDesde(mascota) {
+  return {
     nombre: mascota?.nombre ?? '',
     especie: mascota?.especie ?? 'Perro',
     raza: mascota?.raza ?? '',
     edad: mascota?.edad ?? '',
     sexo: mascota?.sexo ?? 'Macho',
-  }))
+  }
+}
+
+function DetalleMascotaPage() {
+  const { id } = useParams()
+  const navigate = useNavigate()
+
+  // GET /api/v1/pacientes/{id}: si la mascota es de otro dueño el backend responde 403.
+  const [mascota, setMascota] = useState(null)
+  const [cargando, setCargando] = useState(true)
+  const [editando, setEditando] = useState(false)
+  const [mensaje, setMensaje] = useState('')
+  const [error, setError] = useState('')
+  const [formulario, setFormulario] = useState(() => formularioDesde(null))
+
+  useEffect(() => {
+    let activo = true
+    obtenerMascotaPorId(id)
+      .then((encontrada) => {
+        if (!activo) return
+        setMascota(encontrada)
+        setFormulario(formularioDesde(encontrada))
+      })
+      .catch((fallo) => activo && setError(fallo.message))
+      .finally(() => activo && setCargando(false))
+    return () => { activo = false }
+  }, [id])
 
   function manejarCambio(evento) {
     const { name, value } = evento.target
@@ -42,50 +61,38 @@ function DetalleMascotaPage({ pacientes = [], usuario }) {
     }))
   }
 
-  function guardarCambios(evento) {
+  async function guardarCambios(evento) {
     evento.preventDefault()
     setError('')
     setMensaje('')
 
-    const resultado = actualizarMascota(id, formulario)
+    const resultado = await actualizarMascota(id, formulario)
 
     if (!resultado.ok) {
       setError(resultado.mensaje || 'No se pudieron guardar los cambios.')
       return
     }
 
-    const mascotaActualizada = obtenerMascotaPorId(id)
-    setFormulario({
-      nombre: mascotaActualizada.nombre ?? '',
-      especie: mascotaActualizada.especie ?? 'Perro',
-      raza: mascotaActualizada.raza ?? '',
-      edad: mascotaActualizada.edad ?? '',
-      sexo: mascotaActualizada.sexo ?? 'Macho',
-    })
+    setMascota(resultado.mascota)
+    setFormulario(formularioDesde(resultado.mascota))
     setEditando(false)
     setMensaje('Los datos de la mascota se actualizaron correctamente.')
   }
 
   function cancelarEdicion() {
-    setFormulario({
-      nombre: mascota.nombre ?? '',
-      especie: mascota.especie ?? 'Perro',
-      raza: mascota.raza ?? '',
-      edad: mascota.edad ?? '',
-      sexo: mascota.sexo ?? 'Macho',
-    })
+    setFormulario(formularioDesde(mascota))
     setEditando(false)
     setError('')
   }
 
-  function manejarEliminacion() {
+  async function manejarEliminacion() {
     const confirmar = window.confirm(
       `¿Estás seguro de que deseas eliminar a ${mascota.nombre}? Esta acción no se puede deshacer.`,
     )
 
     if (!confirmar) return
 
-    const resultado = eliminarMascota(id)
+    const resultado = await eliminarMascota(id)
 
     if (!resultado.ok) {
       setError(resultado.mensaje || 'No se pudo eliminar la mascota.')
@@ -95,6 +102,14 @@ function DetalleMascotaPage({ pacientes = [], usuario }) {
     navigate('/mascotas', {
       state: { mensaje: 'La mascota fue eliminada correctamente.' },
     })
+  }
+
+  if (cargando) {
+    return (
+      <div className="detalle-mascota-contenedor">
+        <p role="status">Cargando ficha de la mascota...</p>
+      </div>
+    )
   }
 
   if (!mascota) {

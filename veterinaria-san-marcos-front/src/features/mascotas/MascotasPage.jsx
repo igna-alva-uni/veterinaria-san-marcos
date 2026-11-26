@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { obtenerMascotas, registrarMascota } from '../../data/veterinaria.js'
 import perroReal from '../../assets/perro-real.png'
 import './MascotasPage.css'
 
 function MascotasPage() {
-  const [mascotas, setMascotas] = useState(() => obtenerMascotas())
+  const [mascotas, setMascotas] = useState([])
+  const [cargando, setCargando] = useState(true)
   const [busqueda, setBusqueda] = useState('')
   const [mostrarFormulario, setMostrarFormulario] = useState(false)
   const [nombre, setNombre] = useState('')
@@ -16,16 +17,32 @@ function MascotasPage() {
   const [mensaje, setMensaje] = useState('')
   const [tipoMensaje, setTipoMensaje] = useState('exito')
 
+  // GET /api/v1/pacientes: el backend devuelve solo las mascotas del dueño del token.
+  const cargarMascotas = useCallback(async () => {
+    try {
+      setMascotas(await obtenerMascotas())
+    } catch (error) {
+      setMensaje(error.message)
+      setTipoMensaje('error')
+    } finally {
+      setCargando(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    cargarMascotas()
+  }, [cargarMascotas])
+
   const mascotasFiltradas = mascotas.filter((mascota) =>
     `${mascota.nombre} ${mascota.especie} ${mascota.raza}`
       .toLowerCase()
       .includes(busqueda.toLowerCase()),
   )
 
-  function registrarNuevaMascota(event) {
+  async function registrarNuevaMascota(event) {
     event.preventDefault()
 
-    const resultado = registrarMascota({
+    const resultado = await registrarMascota({
       nombre,
       especie,
       raza,
@@ -39,7 +56,7 @@ function MascotasPage() {
       return
     }
 
-    setMascotas(obtenerMascotas())
+    await cargarMascotas()
     setNombre('')
     setEspecie('Perro')
     setRaza('')
@@ -253,7 +270,9 @@ function MascotasPage() {
             />
           </div>
 
-          {mascotasFiltradas.length > 0 ? (
+          {cargando ? (
+            <p role="status">Cargando mascotas...</p>
+          ) : mascotasFiltradas.length > 0 ? (
             <div className="mascotas-grid">
               {mascotasFiltradas.map((mascota) => (
                 <article className="mascota-card" key={mascota.id}>

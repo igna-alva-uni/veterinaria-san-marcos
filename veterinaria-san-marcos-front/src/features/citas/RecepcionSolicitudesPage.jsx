@@ -1,5 +1,5 @@
 
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   actualizarEstadoCita,
@@ -48,7 +48,8 @@ function claseEstado(estado) {
 }
 
 function RecepcionSolicitudesPage() {
-  const [citas, setCitas] = useState(() => obtenerCitas())
+  const [citas, setCitas] = useState([])
+  const [cargando, setCargando] = useState(true)
   const [filtro, setFiltro] = useState('Pendiente de confirmación')
   const [mensaje, setMensaje] = useState('')
   const [tipoMensaje, setTipoMensaje] = useState('exito')
@@ -56,12 +57,24 @@ function RecepcionSolicitudesPage() {
   const [nuevaFecha, setNuevaFecha] = useState('')
   const [nuevaHora, setNuevaHora] = useState('')
 
-  function actualizarListado() {
-    setCitas(obtenerCitas())
-  }
+  // GET /api/v1/citas como recepción: el backend devuelve todas las solicitudes.
+  const actualizarListado = useCallback(async () => {
+    try {
+      setCitas(await obtenerCitas())
+    } catch (error) {
+      setMensaje(error.message)
+      setTipoMensaje('error')
+    } finally {
+      setCargando(false)
+    }
+  }, [])
 
-  function confirmarCita(id) {
-    const resultado = actualizarEstadoCita(id, 'Confirmada')
+  useEffect(() => {
+    actualizarListado()
+  }, [actualizarListado])
+
+  async function confirmarCita(id) {
+    const resultado = await actualizarEstadoCita(id, 'Confirmada')
 
     if (!resultado.ok) {
       setMensaje(resultado.mensaje)
@@ -69,19 +82,19 @@ function RecepcionSolicitudesPage() {
       return
     }
 
-    actualizarListado()
+    await actualizarListado()
     setMensaje('La cita se confirmó correctamente.')
     setTipoMensaje('exito')
   }
 
-  function cancelarCita(id) {
+  async function cancelarCita(id) {
     const confirmar = window.confirm(
       '¿Seguro que quieres cancelar esta cita?',
     )
 
     if (!confirmar) return
 
-    const resultado = actualizarEstadoCita(id, 'Cancelada')
+    const resultado = await actualizarEstadoCita(id, 'Cancelada')
 
     if (!resultado.ok) {
       setMensaje(resultado.mensaje)
@@ -89,7 +102,7 @@ function RecepcionSolicitudesPage() {
       return
     }
 
-    actualizarListado()
+    await actualizarListado()
     setMensaje('La cita se canceló correctamente.')
     setTipoMensaje('exito')
 
@@ -111,7 +124,7 @@ function RecepcionSolicitudesPage() {
     setNuevaHora('')
   }
 
-  function guardarReprogramacion(event, cita) {
+  async function guardarReprogramacion(event, cita) {
     event.preventDefault()
 
     if (!nuevaFecha || !nuevaHora) {
@@ -126,7 +139,7 @@ function RecepcionSolicitudesPage() {
       return
     }
 
-    const resultado = reprogramarCita(cita.id, nuevaFecha, nuevaHora)
+    const resultado = await reprogramarCita(cita.id, nuevaFecha, nuevaHora)
 
     if (!resultado.ok) {
       setMensaje(resultado.mensaje)
@@ -134,7 +147,7 @@ function RecepcionSolicitudesPage() {
       return
     }
 
-    actualizarListado()
+    await actualizarListado()
     cerrarReprogramacion()
     setMensaje(
       'La cita se reprogramó. Quedó pendiente de una nueva confirmación.',
@@ -294,7 +307,9 @@ function RecepcionSolicitudesPage() {
             ))}
           </div>
 
-          {citasFiltradas.length === 0 ? (
+          {cargando ? (
+            <p role="status">Cargando solicitudes...</p>
+          ) : citasFiltradas.length === 0 ? (
             <div className="recepcion-solicitudes-vacio">
               <span aria-hidden="true">📅</span>
               <h3>No hay solicitudes para mostrar</h3>

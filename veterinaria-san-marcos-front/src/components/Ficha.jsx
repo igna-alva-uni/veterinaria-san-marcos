@@ -1,13 +1,17 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { validarAtencion } from "../validaciones";
-import { servicios, medicamentos } from "../catalogo";
+import { useCatalogo } from "../api/catalogo.js";
 import { fechaLocal } from '../data/panel.js';
 import { vacunaDeAtencion } from '../data/vacunas.js';
+import { actualizarObservaciones, eliminarAtencion, registrarAtencion } from '../data/veterinaria.js';
 
-export default function Ficha({ pacientes, setPacientes }) {
+// Ficha clínica: las atenciones y antecedentes se guardan en ms-pacientes.
+export default function Ficha({ pacientes, recargar }) {
   const { id } = useParams();
   const paciente = pacientes.find((x) => String(x.id) === id);
+  const { servicios, productos: medicamentos } = useCatalogo();
+  const [observaciones, setObservaciones] = useState(null);
   const vacio = {
     fecha: "",
     tipo: "",
@@ -27,28 +31,33 @@ export default function Ficha({ pacientes, setPacientes }) {
       </section>
     );
   const historial = paciente.historial || [];
-  const actualizar = (datos) =>
-    setPacientes((v) =>
-      v.map((x) => (x.id === paciente.id ? { ...x, ...datos } : x)),
-    );
-  const guardar = (e) => {
+  const textoObservaciones = observaciones ?? paciente.observaciones ?? "";
+  const guardarObservaciones = async () => {
+    const resultado = await actualizarObservaciones(paciente.id, textoObservaciones);
+    if (!resultado.ok) {
+      setError(resultado.mensaje);
+      return;
+    }
+    await recargar();
+    setObservaciones(null);
+    setError("Antecedentes actualizados");
+  };
+  const guardar = async (e) => {
     e.preventDefault();
     const fallo = validarAtencion(f);
     if (fallo) {
       setError(fallo);
       return;
     }
-    actualizar({
-      historial: [
-        ...historial,
-        {
-          ...f,
-          vacuna: f.vacuna.nombre.trim() ? { ...f.vacuna, nombre: f.vacuna.nombre.trim() } : null,
-          id: Date.now(),
-          tipo: f.tipo || servicios[0]?.nombre || "Consulta",
-        },
-      ],
+    const resultado = await registrarAtencion(paciente.id, {
+      ...f,
+      tipo: f.tipo || servicios[0]?.nombre || "Consulta",
     });
+    if (!resultado.ok) {
+      setError(resultado.mensaje);
+      return;
+    }
+    await recargar();
     setF(vacio);
     setError("Atención registrada correctamente");
   };
@@ -63,10 +72,13 @@ export default function Ficha({ pacientes, setPacientes }) {
       <label>
         Antecedentes y observaciones generales
         <textarea
-          value={paciente.observaciones || ""}
-          onChange={(e) => actualizar({ observaciones: e.target.value })}
+          value={textoObservaciones}
+          onChange={(e) => setObservaciones(e.target.value)}
         />
       </label>
+      <button type="button" disabled={observaciones === null} onClick={guardarObservaciones}>
+        Guardar antecedentes
+      </button>
       <h2>Registrar atención</h2>
       {error && <p role="status">{error}</p>}
       <form className="grid grid-cols-1 gap-x-5 gap-y-3 md:grid-cols-2" onSubmit={guardar}>
@@ -161,11 +173,15 @@ export default function Ficha({ pacientes, setPacientes }) {
             <p>Próximo control: {h.proximoControl || "No definido"}</p>
             <button
               type="button"
-              onClick={() => {
-                if (window.confirm("¿Eliminar esta atención?"))
-                  actualizar({
-                    historial: historial.filter((_, n) => n !== i),
-                  });
+              onClick={async () => {
+                if (!window.confirm("¿Eliminar esta atención?")) return;
+                const resultado = await eliminarAtencion(paciente.id, h.id);
+                if (!resultado.ok) {
+                  setError(resultado.mensaje);
+                  return;
+                }
+                await recargar();
+                setError("Atención eliminada");
               }}
             >
               Eliminar atención

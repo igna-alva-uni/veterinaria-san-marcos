@@ -4,14 +4,18 @@ import { textoRequerido } from "../validaciones";
 export default function NombreUsuarioEditable({ usuario, guardar, avisar }) {
   const [nombre, setNombre] = useState(usuario.nombre);
 
-  const confirmar = () => {
+  const confirmar = async () => {
     if (!textoRequerido(nombre)) {
       avisar("El nombre del usuario no puede estar vacío");
       return;
     }
 
-    guardar(usuario.id, nombre.trim());
-    avisar("Nombre de usuario actualizado");
+    try {
+      await guardar(usuario.id, nombre.trim());
+      avisar("Nombre de usuario actualizado");
+    } catch (error) {
+      avisar(error.message);
+    }
   };
 
   return (

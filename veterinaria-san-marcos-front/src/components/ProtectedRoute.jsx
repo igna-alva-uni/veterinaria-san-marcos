@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom'
 
-// Control de acceso de la demostración. El backend debe autorizar sus endpoints.
+// Control de acceso en la interfaz (IE3.3.3): oculta vistas según el rol del usuario.
+// Es solo experiencia de usuario: cada microservicio vuelve a validar el JWT y el rol (403).
 export default function ProtectedRoute({ user, roles }) {
   if (!user) return <Navigate to="/login" replace />
 

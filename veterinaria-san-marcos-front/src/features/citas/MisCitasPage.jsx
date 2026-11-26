@@ -1,7 +1,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { obtenerCitas } from '../../data/veterinaria.js'
+import { EVENTO_CITAS, actualizarEstadoCita, obtenerCitas } from '../../data/veterinaria.js'
 import './MisCitasPage.css'
 
 function formatoFecha(fechaISO) {
@@ -25,26 +25,36 @@ function claseEstado(estado) {
 }
 
 function MisCitasPage() {
-  const [citas, setCitas] = useState(() => obtenerCitas())
+  const [citas, setCitas] = useState([])
   const [filtro, setFiltro] = useState('Todas')
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState('')
 
-  const cargarCitas = useCallback(() => {
-    setCitas(obtenerCitas())
+  // GET /api/v1/citas: el backend devuelve solo las citas del dueño del token.
+  const cargarCitas = useCallback(async () => {
+    try {
+      setCitas(await obtenerCitas())
+      setError('')
+    } catch (fallo) {
+      setError(fallo.message)
+    } finally {
+      setCargando(false)
+    }
   }, [])
 
-
-
   useEffect(() => {
+    cargarCitas()
+
     function actualizarAlCambiarPestana() {
       cargarCitas()
     }
 
     window.addEventListener('focus', actualizarAlCambiarPestana)
-    window.addEventListener('storage', actualizarAlCambiarPestana)
+    window.addEventListener(EVENTO_CITAS, actualizarAlCambiarPestana)
 
     return () => {
       window.removeEventListener('focus', actualizarAlCambiarPestana)
-      window.removeEventListener('storage', actualizarAlCambiarPestana)
+      window.removeEventListener(EVENTO_CITAS, actualizarAlCambiarPestana)
     }
   }, [cargarCitas])
 
@@ -65,6 +75,16 @@ function MisCitasPage() {
   const canceladas = citas.filter(
     (cita) => cita.estado === 'Cancelada',
   ).length
+
+  async function cancelar(cita) {
+    if (!window.confirm(`¿Cancelar la cita de ${cita.mascotaNombre} del ${formatoFecha(cita.fecha)}?`)) return
+    const resultado = await actualizarEstadoCita(cita.id, 'Cancelada')
+    if (!resultado.ok) {
+      setError(resultado.mensaje)
+      return
+    }
+    await cargarCitas()
+  }
 
   const filtros = [
     { nombre: 'Todas', cantidad: citas.length },
@@ -142,6 +162,9 @@ function MisCitasPage() {
               </p>
             </div>
           </div>
+
+          {error && <p role="alert" className="mis-citas-error">{error}</p>}
+          {cargando && <p role="status">Cargando tus citas...</p>}
 
           <div className="mis-citas-filtros" aria-label="Filtrar citas">
             {filtros.map((opcion) => (
@@ -229,6 +252,15 @@ function MisCitasPage() {
                         >
                           Ver detalle <span aria-hidden="true">→</span>
                         </Link>
+                        {!['Cancelada', 'Completada'].includes(cita.estado) && (
+                          <button
+                            type="button"
+                            className="mis-citas-boton-secundario"
+                            onClick={() => cancelar(cita)}
+                          >
+                            Cancelar
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}

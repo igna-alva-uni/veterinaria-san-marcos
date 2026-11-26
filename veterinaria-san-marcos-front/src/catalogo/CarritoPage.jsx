@@ -1,11 +1,11 @@
-import { claveCompra, guardarCarritoUsuario, leerCarritoUsuario } from '../data/compra.js'
+import { guardarCarritoUsuario, leerCarritoUsuario } from '../data/compra.js'
 import { obtenerSesion } from '../data/veterinaria.js'
+import { useCatalogo } from '../api/catalogo.js'
+import { confirmarPedido as enviarPedido } from '../api/pedidos.js'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import './CarritoPage.css'
-
-function obtenerCarrito() { return leerCarritoUsuario() }
 
 function formatoPrecio(precio) {
   return new Intl.NumberFormat('es-CL', {
@@ -37,29 +37,27 @@ function iconoProducto(producto) {
   return '💊'
 }
 
-function obtenerPedidos() {
-  try {
-    const datos = JSON.parse(localStorage.getItem(claveCompra('vsm-pedidos')) || '[]')
-    return Array.isArray(datos) ? datos : []
-  } catch {
-    return []
-  }
-}
-
 function CarritoPage() {
-  const [productos, setProductosEstado] = useState(obtenerCarrito)
+  // Precios y stock vigentes desde la API; el carrito guardado se ajusta a ellos.
+  const { elementos: catalogo, cargando, error: errorCatalogo, recargar } = useCatalogo()
+  const [productos, setProductosEstado] = useState([])
+  const [enviando, setEnviando] = useState(false)
   const [confirmacion, setConfirmacion] = useState(null)
   const [mensaje, setMensaje] = useState('')
   const [paso, setPaso] = useState('carrito')
   const [pedidoRealizado, setPedidoRealizado] = useState(null)
   const [datosCliente, setDatosCliente] = useState({
-    nombre: obtenerSesion()?.nombre || '',
+    nombre: obtenerSesion()?.nombreCompleto || obtenerSesion()?.nombre || '',
     correo: obtenerSesion()?.correo || '',
     telefono: obtenerSesion()?.telefono || '',
     direccion: '',
     comuna: '',
     observaciones: '',
   })
+
+  useEffect(() => {
+    if (!cargando) setProductosEstado(leerCarritoUsuario(catalogo))
+  }, [catalogo, cargando])
 
   function setProductos(valor) {
     const siguientes = typeof valor === 'function' ? valor(productos) : valor
@@ -161,7 +159,8 @@ function CarritoPage() {
     setDatosCliente((actuales) => ({ ...actuales, [name]: value }))
   }
 
-  function confirmarPedido(evento) {
+  // POST /api/v1/pedidos: el backend valida stock, calcula el total y descuenta inventario.
+  async function confirmarPedido(evento) {
     evento.preventDefault()
     setMensaje('')
 
@@ -171,27 +170,23 @@ function CarritoPage() {
       return
     }
 
-    const pedido = {
-      numero: `VSM-${Date.now().toString().slice(-8)}`,
-      fecha: new Date().toISOString(),
-      duenoId: obtenerSesion()?.id,
-      cliente: { ...datosCliente },
-      productos: productos.map((producto) => ({ ...producto })),
-      subtotalProductos,
-      subtotalServicios,
-      total: precioTotal,
-      estado: 'Pendiente de confirmación',
-    }
-
+    setEnviando(true)
     try {
-      const pedidos = obtenerPedidos()
-      localStorage.setItem(claveCompra('vsm-pedidos'), JSON.stringify([pedido, ...pedidos]))
+      const pedido = await enviarPedido(datosCliente, productos)
       guardarCarritoUsuario([])
+      setProductosEstado([])
       setPedidoRealizado(pedido)
-      setProductos([])
       setPaso('completado')
-    } catch {
-      setMensaje('No se pudo guardar el pedido en este navegador. Revisa el espacio disponible e inténtalo nuevamente.')
+      recargar()
+    } catch (error) {
+      setMensaje(error.message)
+      if (error.status === 409 || error.status === 400) {
+        // Stock o disponibilidad cambiaron: se recarga el catálogo y se vuelve al carrito.
+        await recargar()
+        setPaso('carrito')
+      }
+    } finally {
+      setEnviando(false)
     }
   }
 
@@ -222,6 +217,9 @@ function CarritoPage() {
           <Link to="/catalogo" className="carrito-boton-principal">
             Volver al catálogo
           </Link>
+          <p style={{ marginTop: 14 }}>
+            <Link to="/mis-pedidos">Ver el estado en Mis pedidos</Link>
+          </p>
         </section>
       </div>
     )
@@ -243,6 +241,14 @@ function CarritoPage() {
           ← Seguir comprando
         </Link>
       </section>
+
+      {cargando && <p role="status">Cargando precios y stock actualizados...</p>}
+      {errorCatalogo && (
+        <div className="carrito-mensaje" role="alert">
+          <span>No se pudo cargar el catálogo: {errorCatalogo}</span>
+          <button type="button" onClick={recargar}>Reintentar</button>
+        </div>
+      )}
 
       {mensaje && (
         <div className="carrito-mensaje" role="alert">
@@ -397,11 +403,11 @@ function CarritoPage() {
 
               <p className="carrito-nota">
                 Este formulario registra una solicitud de pedido. No procesa pagos
-                ni confirma disponibilidad o despacho.
+                ni confirma despacho; el stock se reserva al confirmar.
               </p>
 
-              <button type="submit" className="carrito-boton-principal">
-                Confirmar pedido
+              <button type="submit" className="carrito-boton-principal" disabled={enviando}>
+                {enviando ? 'Registrando pedido...' : 'Confirmar pedido'}
               </button>
               <button
                 type="button"

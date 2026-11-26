@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { serviciosCatalogo } from '../../data/catalogo.js'
+import { useCatalogo } from '../../api/catalogo.js'
 import { clinica } from '../../data/clinica.js'
 import logo from '../../assets/logo.jpeg'
 import ServicioCard from './ServicioCard.jsx'
@@ -26,6 +26,7 @@ const accesosPorRol = {
 const destacados = ['SV001', 'SV004', 'SV008', 'SV028']
 
 export default function InicioPage({ usuario, pacientes = [] }) {
+  const { servicios: serviciosCatalogo } = useCatalogo()
   const accesos = accesosPorRol[usuario.rol] || []
   const principal = usuario.rol === 'Administrador' ? {ruta:'/admin',titulo:'Abrir administración'}
     : usuario.rol === 'Recepcionista' ? {ruta:'/recepcion',titulo:'Abrir recepción'}
@@ -59,7 +60,7 @@ export default function InicioPage({ usuario, pacientes = [] }) {
       </section>
       <section className="clinic-section" aria-labelledby="destacados-titulo">
         <div className="clinic-section-heading"><div><span className="clinic-eyebrow">Acompañamos cada etapa</span><h2 id="destacados-titulo">Servicios destacados</h2></div><Link className="clinic-text-link" to="/servicios">Ver todos los servicios <span aria-hidden="true">→</span></Link></div>
-        <div className="clinic-grid clinic-grid--services">{destacados.map(codigo => <ServicioCard key={codigo} servicio={serviciosCatalogo.find(s=>s.codigo===codigo)} rol={usuario.rol} />)}</div>
+        <div className="clinic-grid clinic-grid--services">{destacados.map(codigo => serviciosCatalogo.find(s=>s.codigo===codigo)).filter(Boolean).map(servicio => <ServicioCard key={servicio.codigo} servicio={servicio} rol={usuario.rol} />)}</div>
         <p className="clinic-note">Las solicitudes de atención requieren confirmación de la clínica.</p>
       </section>
       <section className="clinic-about">

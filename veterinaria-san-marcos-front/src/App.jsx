@@ -4,7 +4,7 @@ import Ficha from "./components/Ficha";
 import Usuarios from "./components/Usuarios";
 import Pacientes from "./components/Pacientes";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   BrowserRouter,
   Link,
@@ -14,14 +14,12 @@ import {
   useNavigate,
   useLocation
 } from "react-router-dom";
-import { usuariosIniciales } from "./datos";
 import {
   correoValido,
-  correoValidoParaRol,
-  claveValida,
   textoRequerido,
   validarRegistro,
-  validarPerfil
+  validarPerfil,
+  validarRunYApellido
 } from "./validaciones";
 import "./App.css";
 import MainLayout from './layouts/MainLayout.jsx';
@@ -42,8 +40,21 @@ import DetalleCitaPage from './features/citas/DetalleCitaPage.jsx';
 import RecepcionSolicitudesPage from './features/citas/RecepcionSolicitudesPage.jsx';
 import CatalogoPage from './catalogo/CatalogoPage.jsx';
 import CarritoPage from './catalogo/CarritoPage.jsx';
+import MisPedidosPage from './catalogo/MisPedidosPage.jsx';
+import GestionPedidosPage from './catalogo/GestionPedidosPage.jsx';
+import GestionCatalogoPage from './catalogo/GestionCatalogoPage.jsx';
 import PanelPage from './features/dashboard/PanelPage.jsx';
-import { EVENTO_PACIENTES, leerPacientesCompartidos } from './data/veterinaria.js';
+import { EVENTO_PACIENTES, obtenerMascotas } from './data/veterinaria.js';
+import { iniciarSesion, registrarDueno, verificarSesion, actualizarPerfil } from './api/auth.js';
+import { listarUsuarios } from './api/usuarios.js';
+import {
+  EVENTO_SESION_EXPIRADA,
+  cerrarSesionLocal,
+  leerSesion,
+  limpiarDatosLocalesAntiguos,
+  notificarSesionExpirada,
+} from './api/sesion.js';
+
 const leer = (clave, defecto) => {
   try {
     return JSON.parse(localStorage.getItem(clave)) ?? defecto;
@@ -51,16 +62,15 @@ const leer = (clave, defecto) => {
     return defecto;
   }
 };
+const PERSONAL = ['Administrador', 'Recepcionista'];
+
 function AppInterna() {
-  const [usuarios, setUsuarios] = useState(() =>
-    leer("vet_usuarios", usuariosIniciales),
-  );
-  const [pacientes, setPacientes] = useState(() =>
-    leerPacientesCompartidos(),
-  );
-  const [sesionGuardada, setSesion] = useState(() => leer("vet_sesion", null));
-  const sesion = usuarios.find((usuario) => usuario.id === sesionGuardada?.id && usuario.activo) || null;
+  // La sesión se restaura desde localStorage (token + usuario) y luego se confirma con /auth/me.
+  const [sesion, setSesion] = useState(() => leerSesion()?.usuario ?? null);
+  const [usuarios, setUsuarios] = useState([]);
+  const [pacientes, setPacientes] = useState([]);
   const [mensaje, setMensaje] = useState("");
+  const [enviando, setEnviando] = useState(false);
   const navegar = useNavigate();
   const { pathname } = useLocation();
   const roles = ['Administrador', 'Recepcionista', 'Dueño'];
@@ -73,87 +83,132 @@ function AppInterna() {
     ...(sesion?.rol === 'Administrador' ? [
       { label: 'Administración', href: '/admin' },
     ] : []),
-    ...(['Administrador', 'Recepcionista'].includes(sesion?.rol) ? [
+    ...(PERSONAL.includes(sesion?.rol) ? [
       { label: 'Recepción', href: '/recepcion' },
     ] : []),
-    ...(sesion ? [{ label: 'Carrito', href: '/carrito' }] : []),
+    ...(sesion ? [{ label: 'Mis pedidos', href: '/mis-pedidos' }, { label: 'Carrito', href: '/carrito' }] : []),
   ];
-  useEffect(
-    () => localStorage.setItem("vet_usuarios", JSON.stringify(usuarios)),
-    [usuarios],
-  );
-  useEffect(
-    () => localStorage.setItem("vet_pacientes", JSON.stringify(pacientes)),
-    [pacientes],
-  );
-  useEffect(
-    () => localStorage.setItem("vet_sesion", JSON.stringify(sesion)),
-    [sesion],
-  );
-  useEffect(() => {
-    const sincronizar = () => setPacientes(leerPacientesCompartidos());
-    window.addEventListener(EVENTO_PACIENTES, sincronizar);
-    return () => window.removeEventListener(EVENTO_PACIENTES, sincronizar);
+
+  const recargarPacientes = useCallback(async () => {
+    if (!leerSesion()) return;
+    try {
+      setPacientes(await obtenerMascotas());
+    } catch (error) {
+      if (error.status !== 401) setMensaje(error.message);
+    }
   }, []);
+
+  const recargarUsuarios = useCallback(async () => {
+    if (!PERSONAL.includes(leerSesion()?.usuario?.rol)) {
+      setUsuarios([]);
+      return;
+    }
+    try {
+      setUsuarios(await listarUsuarios());
+    } catch (error) {
+      if (error.status !== 401) setMensaje(error.message);
+    }
+  }, []);
+
+  // 1) Al montar: limpia datos de la versión anterior y valida la sesión guardada con el backend.
+  useEffect(() => {
+    limpiarDatosLocalesAntiguos();
+    if (!leerSesion()) return;
+    verificarSesion()
+      .then((usuario) => setSesion(usuario))
+      .catch((error) => {
+        // 401 ya lo maneja el evento de sesión expirada; otros errores (red) conservan la sesión.
+        if (error.status !== 401) setMensaje(error.message);
+      });
+  }, []);
+
+  // 2) Sesión vencida o rechazada por el backend: se cierra y se vuelve al login con el motivo.
+  useEffect(() => {
+    const alExpirar = (evento) => {
+      setSesion(null);
+      setUsuarios([]);
+      setPacientes([]);
+      setMensaje(evento.detail || 'Tu sesión expiró. Inicia sesión nuevamente.');
+      navegar('/login', { replace: true });
+    };
+    window.addEventListener(EVENTO_SESION_EXPIRADA, alExpirar);
+    return () => window.removeEventListener(EVENTO_SESION_EXPIRADA, alExpirar);
+  }, [navegar]);
+
+  // 3) Temporizador: cierra la sesión justo cuando vence el JWT, aunque no haya peticiones.
+  useEffect(() => {
+    if (!sesion) return;
+    const guardada = leerSesion();
+    if (!guardada) {
+      notificarSesionExpirada();
+      return;
+    }
+    const restante = Math.min(guardada.expiraEn - Date.now(), 2147483647);
+    const temporizador = setTimeout(() => notificarSesionExpirada(), Math.max(restante, 0));
+    return () => clearTimeout(temporizador);
+  }, [sesion]);
+
+  // 4) Datos compartidos según el rol (el backend vuelve a filtrar por rol).
+  useEffect(() => {
+    if (!sesion) return;
+    recargarPacientes();
+    recargarUsuarios();
+  }, [sesion, recargarPacientes, recargarUsuarios]);
+
+  useEffect(() => {
+    window.addEventListener(EVENTO_PACIENTES, recargarPacientes);
+    return () => window.removeEventListener(EVENTO_PACIENTES, recargarPacientes);
+  }, [recargarPacientes]);
+
   const ir = (ruta) => {
     setMensaje("");
     navegar(ruta);
   };
   const cerrarSesion = () => {
+    cerrarSesionLocal();
     setSesion(null);
-    localStorage.removeItem("vet_sesion");
+    setUsuarios([]);
+    setPacientes([]);
     ir("/login");
   };
-  const entrar = (correo = "", clave = "") => {
-    const usuario = usuarios.find(
-      (u) => u.correo.toLowerCase() === correo.toLowerCase().trim() && u.activo,
-    );
-    if (
-      !usuario ||
-      !correoValidoParaRol(correo, usuario.rol) ||
-      !claveValida(clave) ||
-      usuario.clave !== clave
-    ) {
+  const entrar = async (correo = "", clave = "") => {
+    if (!correoValido(correo) || !textoRequerido(clave)) {
       setMensaje("Credenciales inválidas o usuario desactivado");
       return;
     }
-    setSesion(usuario);
-    ir(
-      usuario.rol === "Administrador"
-        ? "/admin"
-        : usuario.rol === "Recepcionista"
-          ? "/recepcion"
-          : "/inicio",
-    );
+    setEnviando(true);
+    try {
+      const usuario = await iniciarSesion(correo, clave);
+      setSesion(usuario);
+      ir(
+        usuario.rol === "Administrador"
+          ? "/admin"
+          : usuario.rol === "Recepcionista"
+            ? "/recepcion"
+            : "/inicio",
+      );
+    } catch (error) {
+      setMensaje(error.message);
+    } finally {
+      setEnviando(false);
+    }
   };
-  const registrar = (datos) => {
-    const error = validarRegistro(datos);
+  const registrar = async (datos) => {
+    const error = validarRegistro(datos) || validarRunYApellido(datos);
     if (error) {
       setMensaje(error);
       return;
     }
-    if (
-      usuarios.some(
-        (u) => u.correo.toLowerCase() === datos.correo.trim().toLowerCase(),
-      )
-    ) {
-      setMensaje("Correo ya registrado");
-      return;
+    setEnviando(true);
+    try {
+      await registrarDueno(datos);
+      setMensaje("Cuenta creada. Ingresa con tu correo y contraseña.");
+      navegar("/login");
+    } catch (fallo) {
+      setMensaje(fallo.message);
+    } finally {
+      setEnviando(false);
     }
-    const nuevo = {
-      id: Date.now(),
-      nombre: datos.nombre.trim(),
-      correo: datos.correo.trim().toLowerCase(),
-      telefono: datos.telefono,
-      clave: datos.clave,
-      rol: "Dueño",
-      activo: true,
-    };
-    setUsuarios((v) => [...v, nuevo]);
-    setMensaje(
-      "Cuenta creada. Ingresa con tu correo y contraseña.",
-    );
-    navegar("/login");
   };
   return (
     <Routes>
@@ -161,6 +216,7 @@ function AppInterna() {
         <Route
           path="/login"
           element={
+            sesion ? <Navigate to="/inicio" replace /> :
             <Formulario
               key="login"
               titulo="Iniciar sesión"
@@ -168,7 +224,7 @@ function AppInterna() {
                 ["correo", "Correo electrónico", "email"],
                 ["clave", "Contraseña", "password"],
               ]}
-              boton="Ingresar"
+              boton={enviando ? "Ingresando..." : "Ingresar"}
               enviar={(d) => entrar(d.correo, d.clave)}
               pie={
                 <p>
@@ -185,13 +241,20 @@ function AppInterna() {
               key="registro"
               titulo="Registro de dueño de mascota"
               campos={[
-                ["nombre", "Nombre completo"],
+                ["run", "RUN (ej. 12345678-5)"],
+                ["nombre", "Nombre"],
+                ["apellido", "Apellido"],
                 ["correo", "Correo electrónico", "email"],
                 ["telefono", "Teléfono"],
                 ["clave", "Contraseña", "password"],
               ]}
-              boton="Crear cuenta"
+              boton={enviando ? "Creando cuenta..." : "Crear cuenta"}
               enviar={registrar}
+              pie={
+                <p>
+                  ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
+                </p>
+              }
             />
           }
         />
@@ -216,31 +279,29 @@ function AppInterna() {
               element={
                 <section className="tarjeta">
                   <h1>Mi perfil</h1>
+                  <p>{sesion?.correo} · {sesion?.rol} · RUN {sesion?.run}</p>
                   <Formulario
                     key={sesion?.id}
                     titulo="Actualizar mis datos"
                     inicial={sesion || {}}
                     campos={[
                       ["nombre", "Nombre"],
+                      ["apellido", "Apellido"],
                       ["telefono", "Teléfono"],
                     ]}
                     boton="Guardar cambios"
-                    enviar={(d) => {
+                    enviar={async (d) => {
                       const fallo = validarPerfil(d);
-                      if (fallo) {
-                        setMensaje(fallo);
+                      if (fallo || !textoRequerido(d.apellido)) {
+                        setMensaje(fallo || "Ingresa tu apellido");
                         return;
                       }
-                      const actualizado = {
-                        ...sesion,
-                        nombre: d.nombre.trim(),
-                        telefono: d.telefono,
-                      };
-                      setSesion(actualizado);
-                      setUsuarios((v) =>
-                        v.map((u) => (u.id === actualizado.id ? actualizado : u)),
-                      );
-                      setMensaje("Perfil actualizado");
+                      try {
+                        setSesion(await actualizarPerfil(d));
+                        setMensaje("Perfil actualizado");
+                      } catch (error) {
+                        setMensaje(error.message);
+                      }
                     }}
                   />
                   {sesion?.rol === "Dueño" && (
@@ -303,15 +364,16 @@ function AppInterna() {
             <Route path="/ubicacion" element={<UbicacionPage />} />
             <Route path="/catalogo" element={<CatalogoPage key={sesion?.id} />} />
             <Route path="/carrito" element={<CarritoPage key={sesion?.id} />} />
+            <Route path="/mis-pedidos" element={<MisPedidosPage key={sesion?.id} />} />
             <Route path="/mis-citas" element={<MisCitasPage />} />
             <Route path="/mis-citas/:id" element={<DetalleCitaPage key={pathname} />} />
             <Route element={<ProtectedRoute user={sesion} roles={['Dueño']} />}>
               <Route path="/mascotas" element={<MascotasPage />} />
-              <Route path="/mascotas/:id" element={<DetalleMascotaPage key={pathname} pacientes={pacientes} usuario={sesion} />} />
+              <Route path="/mascotas/:id" element={<DetalleMascotaPage key={pathname} />} />
               <Route path="/citas/nueva" element={<SolicitarCitaPage />} />
             </Route>
           </Route>
-          <Route element={<ProtectedRoute user={sesion} roles={['Administrador', 'Recepcionista']} />}>
+          <Route element={<ProtectedRoute user={sesion} roles={PERSONAL} />}>
             <Route element={<DashboardLayout title="Panel de recepción" homePath="/recepcion" />}>
               <Route element={<ContentLayout />}>
                 <Route
@@ -319,17 +381,18 @@ function AppInterna() {
                   element={
                     <Pacientes
                       pacientes={pacientes}
-                      setPacientes={setPacientes}
+                      recargar={recargarPacientes}
                       usuarios={usuarios}
                       ir={ir}
                     />
                   }
                 />
-                <Route path="/recepcion/pacientes/:id" element={<Ficha pacientes={pacientes} setPacientes={setPacientes} />} />
+                <Route path="/recepcion/pacientes/:id" element={<Ficha pacientes={pacientes} recargar={recargarPacientes} />} />
               </Route>
               <Route element={<ContentLayout variant="feature" />}>
                 <Route path="/recepcion" element={<PanelPage tipo="recepcion" usuario={sesion} usuarios={usuarios} pacientes={pacientes} />} />
                 <Route path="/recepcion/solicitudes" element={<RecepcionSolicitudesPage />} />
+                <Route path="/recepcion/pedidos" element={<GestionPedidosPage />} />
               </Route>
             </Route>
           </Route>
@@ -341,7 +404,7 @@ function AppInterna() {
                   element={
                     <Usuarios
                       usuarios={usuarios}
-                      setUsuarios={setUsuarios}
+                      recargar={recargarUsuarios}
                       setMensaje={setMensaje}
                       sesion={sesion}
                       pacientes={pacientes}
@@ -349,6 +412,7 @@ function AppInterna() {
                   }
                 />
                 <Route path="/admin/reportes" element={<Reportes pacientes={pacientes} usuarios={usuarios} />} />
+                <Route path="/admin/catalogo" element={<GestionCatalogoPage />} />
               </Route>
               <Route element={<ContentLayout variant="feature" />}>
                 <Route path="/admin" element={<PanelPage tipo="admin" usuario={sesion} usuarios={usuarios} pacientes={pacientes} />} />

@@ -1,8 +1,10 @@
 import { useState } from "react";
 import PacienteEditable from "./PacienteEditable";
 import { validarPaciente } from "../validaciones";
+import { actualizarMascota, crearPaciente, eliminarMascota } from "../data/veterinaria.js";
 
-export default function Pacientes({ pacientes, setPacientes, usuarios, ir }) {
+// Gestión de pacientes de recepción: cada acción llama a ms-pacientes y luego recarga la lista.
+export default function Pacientes({ pacientes, recargar, usuarios, ir }) {
   const [f, setF] = useState({
     nombre: "",
     especie: "Perro",
@@ -12,8 +14,12 @@ export default function Pacientes({ pacientes, setPacientes, usuarios, ir }) {
   });
   const [busqueda, setBusqueda] = useState("");
   const [error, setError] = useState("");
-  const guardarEdicion = (id, datos) =>
-    setPacientes((v) => v.map((x) => (x.id === id ? { ...x, ...datos } : x)));
+  const [guardando, setGuardando] = useState(false);
+  const guardarEdicion = async (id, datos) => {
+    const resultado = await actualizarMascota(id, datos);
+    if (resultado.ok) await recargar();
+    return resultado;
+  };
   return (
     <section className="tarjeta">
       <h1>Gestión de pacientes</h1>
@@ -21,7 +27,7 @@ export default function Pacientes({ pacientes, setPacientes, usuarios, ir }) {
       {error && <p role="alert">{error}</p>}
       <form
         className="grid grid-cols-1 gap-x-5 gap-y-3 md:grid-cols-2"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
           const fallo = validarPaciente(f);
           if (fallo) {
@@ -29,17 +35,15 @@ export default function Pacientes({ pacientes, setPacientes, usuarios, ir }) {
             return;
           }
           setError("");
-          setPacientes((v) => [
-            ...v,
-            {
-              ...f,
-              id: Date.now(),
-              edad: Number(f.edad),
-              duenoId: Number(f.duenoId),
-              historial: [],
-              observaciones: "",
-            },
-          ]);
+          setGuardando(true);
+          const resultado = await crearPaciente({ ...f, duenoId: Number(f.duenoId) });
+          setGuardando(false);
+          if (!resultado.ok) {
+            setError(resultado.mensaje);
+            return;
+          }
+          await recargar();
+          setError("Mascota registrada correctamente");
           setF({
             nombre: "",
             especie: "Perro",
@@ -103,7 +107,7 @@ export default function Pacientes({ pacientes, setPacientes, usuarios, ir }) {
               ))}
           </select>
         </label>
-        <button>Registrar mascota</button>
+        <button disabled={guardando}>{guardando ? "Guardando..." : "Registrar mascota"}</button>
       </form>
       <input
         placeholder="Buscar mascota"
@@ -163,7 +167,7 @@ export default function Pacientes({ pacientes, setPacientes, usuarios, ir }) {
                       <button
                         type="button"
                         className="boton-eliminar"
-                        onClick={() => {
+                        onClick={async () => {
                           if (
                             window.confirm(
                               "¿Seguro que deseas eliminar a " +
@@ -171,7 +175,13 @@ export default function Pacientes({ pacientes, setPacientes, usuarios, ir }) {
                                 "?\n\nTambién se eliminará su historial clínico.",
                             )
                           ) {
-                            setPacientes((v) => v.filter((p) => p.id !== x.id));
+                            const resultado = await eliminarMascota(x.id);
+                            if (!resultado.ok) {
+                              setError(resultado.mensaje);
+                              return;
+                            }
+                            await recargar();
+                            setError(x.nombre + " fue eliminada correctamente");
                           }
                         }}
                       >

@@ -1,10 +1,7 @@
 import { guardarCarritoUsuario, leerCarritoUsuario } from '../data/compra.js'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import {
-  categoriasProductos,
-  productosCatalogo,
-} from '../data/catalogo.js'
+import { useCatalogo } from '../api/catalogo.js'
 import './CatalogoPage.css'
 
 const ICONOS_CATEGORIA = {
@@ -25,10 +22,9 @@ const ICONOS_CATEGORIA = {
   Otros: '🐶',
 }
 
-function leerCarrito() { return leerCarritoUsuario() }
-
-function guardarEnCarrito(elemento) {
-  const carrito = leerCarrito()
+// El carrito guarda código, tipo y cantidad; precio y stock se toman del catálogo de la API.
+function guardarEnCarrito(elemento, catalogo) {
+  const carrito = leerCarritoUsuario(catalogo)
   const existente = carrito.find(
     (item) => item.codigo === elemento.codigo,
   )
@@ -74,6 +70,12 @@ function formatoPrecio(precio) {
 }
 
 function CatalogoPage() {
+  // GET /api/v1/productos y /api/v1/servicios (ms-citas, vía API Gateway).
+  const { elementos: productosCatalogo, cargando, error, recargar } = useCatalogo()
+  const categoriasProductos = useMemo(
+    () => [...new Set(productosCatalogo.map((elemento) => elemento.categoria))],
+    [productosCatalogo],
+  )
   const [busqueda, setBusqueda] = useState('')
   const [categoria, setCategoria] = useState('Todas')
   const [tipo, setTipo] = useState('todos')
@@ -129,7 +131,7 @@ function CatalogoPage() {
 
         return a.nombre.localeCompare(b.nombre, 'es')
       })
-  }, [busqueda, categoria, tipo, orden])
+  }, [productosCatalogo, busqueda, categoria, tipo, orden])
 
   function mostrarAviso(resultado) {
     if (temporizadorAviso.current) {
@@ -157,7 +159,7 @@ function CatalogoPage() {
   }
 
   function manejarAgregar(elemento) {
-    const resultado = guardarEnCarrito(elemento)
+    const resultado = guardarEnCarrito(elemento, productosCatalogo)
     mostrarAviso(resultado)
   }
 
@@ -310,7 +312,19 @@ function CatalogoPage() {
           </button>
         </div>
 
-        {productosFiltrados.length > 0 ? (
+        {error && (
+          <div className="catalogo-vacio" role="alert">
+            <h3>No se pudo cargar el catálogo</h3>
+            <p>{error}</p>
+            <button type="button" className="catalogo-agregar" onClick={recargar}>
+              Reintentar
+            </button>
+          </div>
+        )}
+
+        {cargando ? (
+          <p role="status">Cargando catálogo...</p>
+        ) : error ? null : productosFiltrados.length > 0 ? (
           <div className="catalogo-grid">
             {productosFiltrados.map((elemento) => (
               <article

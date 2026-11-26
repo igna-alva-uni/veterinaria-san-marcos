@@ -1,9 +1,7 @@
 
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import {
-  obtenerCitaPorId,
-  obtenerMascotaPorId,
-} from '../../data/veterinaria.js'
+import { obtenerCitaPorId } from '../../data/veterinaria.js'
 import './DetalleCitaPage.css'
 
 function formatearFecha(fechaISO) {
@@ -23,7 +21,28 @@ function formatearFecha(fechaISO) {
 
 function DetalleCitaPage() {
   const { id } = useParams()
-  const cita = obtenerCitaPorId(id)
+  // GET /api/v1/citas/{id}: 403 si la cita es de otro dueño (se muestra como no encontrada).
+  const [cita, setCita] = useState(null)
+  const [cargando, setCargando] = useState(true)
+
+  useEffect(() => {
+    let activo = true
+    obtenerCitaPorId(id)
+      .then((encontrada) => activo && setCita(encontrada))
+      .catch(() => activo && setCita(null))
+      .finally(() => activo && setCargando(false))
+    return () => { activo = false }
+  }, [id])
+
+  if (cargando) {
+    return (
+      <div className="detalle-cita-page">
+        <div className="detalle-cita-contenido">
+          <p role="status">Cargando cita...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (!cita) {
     return (
@@ -50,9 +69,8 @@ function DetalleCitaPage() {
     )
   }
 
-  const mascota = obtenerMascotaPorId(cita.mascotaId)
   const nombreMascota =
-    mascota?.nombre || cita.mascotaNombre || cita.mascota || 'Sin nombre'
+    cita.mascotaNombre || cita.mascota || 'Sin nombre'
 
   const estado = cita.estado || 'Pendiente de confirmación'
 
@@ -135,7 +153,7 @@ function DetalleCitaPage() {
 
               <div>
                 <dt>Especie</dt>
-                <dd>{mascota?.especie || 'No disponible'}</dd>
+                <dd>{cita.mascotaEspecie || 'No disponible'}</dd>
               </div>
 
               <div>

@@ -10,7 +10,7 @@ export default function PacienteEditable({ paciente, guardar }) {
 
   const [error, setError] = useState("");
 
-  const confirmar = () => {
+  const confirmar = async () => {
     const fallo = validarPaciente({ ...paciente, ...datos });
 
     if (fallo) {
@@ -18,13 +18,13 @@ export default function PacienteEditable({ paciente, guardar }) {
       return;
     }
 
-    guardar(paciente.id, {
+    const resultado = await guardar(paciente.id, {
       ...datos,
       nombre: datos.nombre.trim(),
       edad: Number(datos.edad),
     });
 
-    setError("");
+    setError(resultado?.ok === false ? resultado.mensaje : "");
   };
 
   return (

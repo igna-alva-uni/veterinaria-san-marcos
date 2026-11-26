@@ -8,6 +8,8 @@ x-backend-service: &backend-service
 x-backend-env: &backend-env
   DB_URL: jdbc:postgresql://postgres:5432/veterinaria
   EUREKA_URL: http://eureka:8761/eureka/
+  JWT_SECRET: ${JWT_SECRET:?Configura JWT_SECRET en .env}
+  JWT_EXPIRATION_MINUTES: ${JWT_EXPIRATION_MINUTES:-60}
 
 services:
   postgres:
@@ -82,6 +84,11 @@ services:
   frontend:
     build:
       context: ./veterinaria-san-marcos-front
+    depends_on:
+      - ms-api-gateway
+    environment:
+      # Vite reenvía /api al gateway (ver vite.config.js), así el navegador no necesita CORS.
+      API_PROXY_TARGET: http://ms-api-gateway:9001
     ports:
       - "5173:5173"
     volumes:

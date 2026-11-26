@@ -1,6 +1,7 @@
-import { useSyncExternalStore } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { fechaLocal, leerCitasPanel, resumirPanel, suscribirCitasPanel } from '../../data/panel.js'
+import { fechaLocal, resumirPanel } from '../../data/panel.js'
+import { EVENTO_CITAS, obtenerCitas } from '../../data/veterinaria.js'
 import './PanelPage.css'
 
 const accesosAdmin = [
@@ -8,20 +9,31 @@ const accesosAdmin = [
   {titulo:'Reportes',texto:'Consulta el historial de atenciones por período.',ruta:'/admin/reportes',icono:'↗'},
   {titulo:'Pacientes',texto:'Revisa los registros y las fichas clínicas.',ruta:'/recepcion/pacientes',icono:'♡'},
   {titulo:'Solicitudes de citas',texto:'Supervisa las solicitudes y sus horarios.',ruta:'/recepcion/solicitudes',icono:'✓'},
+  {titulo:'Catálogo de la tienda',texto:'Crea, edita y elimina productos y servicios.',ruta:'/admin/catalogo',icono:'▦'},
+  {titulo:'Pedidos de la tienda',texto:'Confirma, entrega o cancela los pedidos.',ruta:'/recepcion/pedidos',icono:'🛒'},
 ]
 const accesosRecepcion = [
   {titulo:'Solicitudes de citas',texto:'Confirma, cancela o reprograma una atención.',ruta:'/recepcion/solicitudes',icono:'✓'},
   {titulo:'Pacientes',texto:'Registra mascotas y actualiza sus fichas clínicas.',ruta:'/recepcion/pacientes',icono:'+'},
+  {titulo:'Pedidos de la tienda',texto:'Confirma, entrega o cancela los pedidos.',ruta:'/recepcion/pedidos',icono:'🛒'},
 ]
 function formatearFecha(fecha) {
   const valor = new Date(`${fecha}T12:00:00`)
   return Number.isNaN(valor.getTime()) ? 'Sin fecha' : valor.toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'})
 }
 export default function PanelPage({ tipo, usuario, usuarios, pacientes }) {
-  const snapshot = useSyncExternalStore(suscribirCitasPanel, leerCitasPanel, () => '[]')
-  let citas
-  try { citas=JSON.parse(snapshot) } catch { citas=[] }
-  if (!Array.isArray(citas)) citas=[]
+  // Las citas se piden a ms-citas (GET /api/v1/citas) y se recargan cuando cambian.
+  const [citas, setCitas] = useState([])
+  const [error, setError] = useState('')
+  useEffect(() => {
+    let activo = true
+    const cargar = () => obtenerCitas()
+      .then(lista => { if (activo) { setCitas(lista); setError('') } })
+      .catch(fallo => activo && setError(fallo.message))
+    cargar()
+    window.addEventListener(EVENTO_CITAS, cargar)
+    return () => { activo = false; window.removeEventListener(EVENTO_CITAS, cargar) }
+  }, [])
   const resumen = resumirPanel(usuarios,pacientes,citas)
   const administrador = tipo === 'admin'
   const accesos = administrador ? accesosAdmin : accesosRecepcion
@@ -42,6 +54,7 @@ export default function PanelPage({ tipo, usuario, usuarios, pacientes }) {
         <div><span className="panel-eyebrow">{administrador?'Administración':'Recepción'} · {formatearFecha(fechaLocal())}</span><h1>Resumen de {administrador?'administración':'recepción'}</h1><p>Hola, {usuario.nombre}. {administrador?'Consulta el estado de la clínica y accede a sus módulos de gestión.':'Organiza las solicitudes y prepara las próximas atenciones.'}</p></div>
         <Link className="site-button" to={administrador?'/admin/usuarios':'/recepcion/solicitudes'}>{administrador?'Gestionar usuarios':'Revisar solicitudes'} <span aria-hidden="true">→</span></Link>
       </section>
+      {error && <p role="alert" className="layout-message">{error}</p>}
       <section className="panel-metrics" aria-label="Indicadores del panel">{metricas.map(m=><Link className="panel-metric" to={m.ruta} key={m.nombre}><span>{m.nombre}</span><strong>{m.valor}</strong><span className="panel-metric-link">Ver detalles <span aria-hidden="true">↗</span></span></Link>)}</section>
       <section className="panel-section" aria-labelledby="accesos-panel"><h2 id="accesos-panel">Accesos de gestión</h2><div className="panel-shortcuts">{accesos.map(a=><Link className="panel-shortcut" to={a.ruta} key={a.ruta}><span className="panel-icon" aria-hidden="true">{a.icono}</span><div><h3>{a.titulo}</h3><p>{a.texto}</p></div><span aria-hidden="true">↗</span></Link>)}</div></section>
       <section className="panel-section panel-agenda" aria-labelledby="agenda-panel"><div className="panel-section-heading"><div><span className="panel-eyebrow">Agenda</span><h2 id="agenda-panel">Próximas citas</h2></div><Link to="/recepcion/solicitudes">Ver todas las solicitudes <span aria-hidden="true">→</span></Link></div>

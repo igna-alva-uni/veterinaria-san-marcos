@@ -1,10 +1,17 @@
 import { useState } from "react";
 import NombreUsuarioEditable from "./NombreUsuarioEditable";
 import FormularioUsuario from "./FormularioUsuario.jsx";
+import {
+  actualizarUsuario,
+  cambiarEstadoUsuario,
+  crearUsuario,
+  eliminarUsuario,
+} from "../api/usuarios.js";
 
+// CRUD de usuarios contra ms-usuarios (solo rol Administrador, validado también en el backend).
 export default function Usuarios({
   usuarios,
-  setUsuarios,
+  recargar,
   setMensaje,
   sesion,
   pacientes,
@@ -31,10 +38,10 @@ export default function Usuarios({
           usuarios={usuarios}
           propio={editando?.id === sesion.id}
           cancelar={() => { setNuevo(false); setEditando(null); }}
-          guardar={(datos) => {
-            setUsuarios(actuales => editando
-              ? actuales.map(u => u.id === editando.id ? { ...u, nombre: datos.nombre, correo: datos.correo, rol: datos.rol } : u)
-              : [...actuales, { ...datos, id: Math.max(0, ...actuales.map(u => Number(u.id))) + 1, activo: true }]);
+          guardar={async (datos) => {
+            if (editando) await actualizarUsuario(editando.id, datos);
+            else await crearUsuario(datos);
+            await recargar();
             setMensaje(editando ? 'Usuario actualizado correctamente' : 'Usuario creado correctamente');
             setNuevo(false);
             setEditando(null);
@@ -64,7 +71,7 @@ export default function Usuarios({
             <tbody>
               {usuarios
                 .filter((u) =>
-                  (u.nombre + " " + u.correo)
+                  (u.nombreCompleto + " " + u.correo + " " + u.run)
                     .toLowerCase()
                     .includes(busqueda.toLowerCase()),
                 )
@@ -75,14 +82,10 @@ export default function Usuarios({
                         key={`${u.id}-${u.nombre}`}
                         usuario={u}
                         avisar={setMensaje}
-                        guardar={(id, nombre) =>
-                          setUsuarios((v) =>
-                            v.map((x) => (x.id === id ? { ...x, nombre } : x)),
-                          )
-                        }
+                        guardar={(id, nombre) => actualizarUsuario(id, { ...u, nombre }).then(recargar)}
                       />
                     </td>
-                    <td>{u.correo}</td>
+                    <td>{u.correo}<br /><small>RUN {u.run}</small></td>
                     <td>
                       {u.rol}
                     </td>
@@ -91,13 +94,15 @@ export default function Usuarios({
                       <button type="button" aria-label={`Editar usuario ${u.nombre}`} onClick={() => { setEditando(u); setNuevo(false); }}>Editar usuario</button>
                       <button
                         disabled={u.id === sesion.id}
-                        onClick={() =>
-                          setUsuarios((v) =>
-                            v.map((x) =>
-                              x.id === u.id ? { ...x, activo: !x.activo } : x,
-                            ),
-                          )
-                        }
+                        onClick={async () => {
+                          try {
+                            await cambiarEstadoUsuario(u.id, !u.activo);
+                            await recargar();
+                            setMensaje(u.activo ? "Usuario desactivado" : "Usuario activado");
+                          } catch (error) {
+                            setMensaje(error.message);
+                          }
+                        }}
                       >
                         {u.activo ? "Desactivar" : "Activar"}
                       </button>
@@ -106,7 +111,7 @@ export default function Usuarios({
                         type="button"
                         className="boton-eliminar"
                         disabled={u.id === sesion.id}
-                        onClick={() => {
+                        onClick={async () => {
                           if (u.rol !== "Dueño") {
                             setMensaje(
                               "Solo se pueden eliminar clientes desde esta opción",
@@ -126,8 +131,13 @@ export default function Usuarios({
                               "¿Seguro que deseas eliminar a " + u.nombre + "?",
                             )
                           ) {
-                            setUsuarios((v) => v.filter((x) => x.id !== u.id));
-                            setMensaje("Cliente eliminado correctamente");
+                            try {
+                              await eliminarUsuario(u.id);
+                              await recargar();
+                              setMensaje("Cliente eliminado correctamente");
+                            } catch (error) {
+                              setMensaje(error.message);
+                            }
                           }
                         }}
                       >

@@ -66,3 +66,25 @@ export function validarAtencion(
     return "Ingresa el nombre de la vacuna aplicada";
   return "";
 }
+
+// EP3: el backend exige RUN y apellido (columnas NOT NULL en usuarios.usuarios).
+export function runValido(run) {
+  const limpio = String(run ?? "").replace(/[.\s]/g, "").toUpperCase();
+  const coincidencia = limpio.match(/^(\d{7,8})-?([\dK])$/);
+  if (!coincidencia) return false;
+  const [, numero, dv] = coincidencia;
+  let suma = 0;
+  let multiplicador = 2;
+  for (let i = numero.length - 1; i >= 0; i--) {
+    suma += Number(numero[i]) * multiplicador;
+    multiplicador = multiplicador === 7 ? 2 : multiplicador + 1;
+  }
+  const resto = 11 - (suma % 11);
+  const esperado = resto === 11 ? "0" : resto === 10 ? "K" : String(resto);
+  return dv === esperado;
+}
+export function validarRunYApellido(d) {
+  if (!runValido(d.run)) return "Ingresa un RUN válido (ej. 12345678-5)";
+  if (!textoRequerido(d.apellido)) return "Ingresa tu apellido";
+  return "";
+}

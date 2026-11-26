@@ -1,14 +1,3 @@
-export function leerCitasPanel() {
-  try { return localStorage.getItem('vsm-citas') || '[]' } catch { return '[]' }
-}
-export function suscribirCitasPanel(actualizar) {
-  window.addEventListener('vet:citas', actualizar)
-  window.addEventListener('storage', actualizar)
-  return () => {
-    window.removeEventListener('vet:citas', actualizar)
-    window.removeEventListener('storage', actualizar)
-  }
-}
 export function fechaLocal(fecha = new Date()) {
   return `${fecha.getFullYear()}-${String(fecha.getMonth()+1).padStart(2,'0')}-${String(fecha.getDate()).padStart(2,'0')}`
 }
